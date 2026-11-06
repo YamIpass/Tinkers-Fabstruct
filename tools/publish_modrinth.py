@@ -30,8 +30,9 @@ API = "https://api.modrinth.com/v2"
 
 PROJECT_SLUG = "tinkers-fabstruct"
 PROJECT_TITLE = "Tinkers' Fabstruct"
-PROJECT_SUMMARY = "Unofficial Fabric 1.20.1 port of Tinkers' Construct 3.12.1"
-CATEGORIES = ["equipment", "technology", "game-mechanics", "worldgen"]
+PROJECT_SUMMARY = "Unofficial Fabric 1.20.1 port of Tinkers' Construct 3.12.1 (中文名：匠魂织布)"
+CATEGORIES = ["equipment", "technology", "game-mechanics"]
+ADDITIONAL_CATEGORIES = ["worldgen"]
 GAME_VERSIONS = ["1.20.1"]
 LOADERS = ["fabric"]
 FABRIC_API_PROJECT = "P7dR8mSH"
@@ -104,44 +105,49 @@ def multipart(fields: dict[str, str], files: dict[str, Path]) -> tuple[bytes, st
 
 
 def do_create() -> None:
+  icon = ROOT / "docs/modrinth/icon.png"
   payload = {
     "slug": PROJECT_SLUG,
     "title": PROJECT_TITLE,
     "description": PROJECT_SUMMARY,
     "body": read("docs/modrinth/description.md"),
     "categories": CATEGORIES,
+    "additional_categories": ADDITIONAL_CATEGORIES,
+    "project_type": "mod",
     "client_side": "required",
     "server_side": "required",
     "license_id": "MIT",
-    "is_draft": False,
+    "source_url": "https://github.com/YamIpass/Tinkers-Fabstruct",
+    "issues_url": "https://github.com/YamIpass/Tinkers-Fabstruct/issues",
+    "is_draft": True,
+    "initial_versions": [],
+    "gallery_items": [],
   }
-  project = request("POST", "/project", data=json.dumps(payload).encode(), content_type="application/json")
+  data, ctype = multipart({"data": json.dumps(payload)}, {"icon": icon})
+  project = request("POST", "/project", data=data, content_type=ctype)
   pid = project["id"]
   (ROOT / ".modrinth-project").write_text(pid, encoding="utf-8")
-  print(f"created project {pid} ({project.get('slug')})")
-
-  icon = ROOT / "docs/modrinth/icon.png"
-  body, ctype = multipart({}, {"icon": icon})
-  request("POST", f"/project/{pid}/icon", data=body, content_type=ctype)
-  print(f"uploaded icon {icon.name}")
+  print(f"created project {pid} ({project.get('slug')}) with icon {icon.name}")
 
 
 def do_upload(explicit: str | None) -> None:
   pid = project_id(explicit)
   jar = jar_path()
-  changelog = read("CHANGELOG.md")
-  fields = {
+  payload = {
     "project_id": pid,
     "name": f"{PROJECT_TITLE} 0.1.0",
     "version_number": "0.1.0",
-    "changelog": changelog,
+    "changelog": read("CHANGELOG.md"),
     "version_type": "release",
-    "game_versions": json.dumps(GAME_VERSIONS),
-    "loaders": json.dumps(LOADERS),
-    "dependencies": json.dumps([{"project_id": FABRIC_API_PROJECT, "dependency_type": "required"}]),
-    "featured": "true",
+    "game_versions": GAME_VERSIONS,
+    "loaders": LOADERS,
+    "dependencies": [{"project_id": FABRIC_API_PROJECT, "dependency_type": "required"}],
+    "featured": True,
+    "status": "listed",
+    "file_parts": ["file"],
+    "primary_file": "file",
   }
-  body, ctype = multipart(fields, {"file": jar})
+  body, ctype = multipart({"data": json.dumps(payload)}, {"file": jar})
   version = request("POST", "/version", data=body, content_type=ctype)
   print(f"uploaded version {version.get('version_number')} ({len(jar.read_bytes())} bytes): "
         f"https://modrinth.com/mod/{PROJECT_SLUG}/version/{version.get('id')}")

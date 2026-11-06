@@ -2,6 +2,8 @@
 
 **Unofficial Fabric port of Tinkers' Construct 3.12.1 for Minecraft 1.20.1.**
 
+中文名：**匠魂织布**
+
 The Java code is the upstream 3.12.1 source, adapted to the Fabric platform — not a rewrite. Gameplay values, data files and assets are the upstream ones; only the loader-facing layers were changed, plus the smallest possible shims where Fabric has no equivalent of a Forge API.
 
 ## What you get

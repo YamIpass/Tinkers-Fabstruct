@@ -3560,6 +3560,6 @@
   "advancements.tconstruct.world.piggybackpack.description": "用肩驮架驮起一只猪",
   "advancements.tconstruct.world.ancient_tools.title": "考古学家",
   "advancements.tconstruct.world.ancient_tools.description": "找到所有的远古工具",
-  "modmenu.nameTranslation.tconstruct": "Tinkers' Fabstruct",
-  "modmenu.descriptionTranslation.tconstruct": "匠魂的 Fabric 1.20.1 非官方移植（Tinkers' Fabstruct）"
+  "modmenu.nameTranslation.tconstruct": "匠魂织布",
+  "modmenu.descriptionTranslation.tconstruct": "匠魂的 Fabric 1.20.1 非官方移植（Tinkers' Fabstruct，中文名：匠魂织布）"
 }

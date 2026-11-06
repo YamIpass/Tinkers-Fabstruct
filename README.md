@@ -2,6 +2,8 @@
 
 An unofficial **Fabric** port of [Tinkers' Construct](https://github.com/SlimeKnights/TinkersConstruct) **3.12.1** for **Minecraft 1.20.1**.
 
+中文名：**匠魂织布**（Tinkers' Fabstruct）。
+
 This is not a rewrite or a "spiritual successor": the Java code is the upstream 3.12.1 source, adapted to the Fabric platform. Where Fabric has no equivalent of a Forge API, the smallest possible loader-level shim is used, and gameplay values are left untouched. Data files (`data/**`) and assets (`assets/**`) come straight out of the upstream 3.12.1 jar.
 
 > Not affiliated with or endorsed by SlimeKnights. "Tinkers' Construct" is their work, released under the MIT license. See [Credits](#credits).

@@ -37,6 +37,14 @@ Reach Entity Attributes 2.4.0 — https://github.com/JamiesWhiteShirt/reach-enti
 NightConfig core/toml 3.6.6 — https://github.com/TheElectronWill/night-config — LGPL-3.0
 jsr305 3.0.2 — https://github.com/findbugsproject/jsr305 — Apache-2.0
 
+Icon artwork
+------------
+The sign artwork in the project icon is `logo.png` from the upstream Tinkers'
+Construct 3.12.1 jar (Copyright (c) SlimeKnights, MIT).
+The cloth artwork in the project icon is `assets/fabricloader/icon.png` from
+Fabric Loader (Copyright (c) FabricMC, Apache-2.0); it is used only to indicate
+that this mod runs on the Fabric platform.
+
 Trademarks
 ----------
 "Tinkers' Construct", "Mantle" and the SlimeKnights name are used only to

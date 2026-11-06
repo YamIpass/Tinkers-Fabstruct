@@ -1,0 +1,14 @@
+* text=auto eol=lf
+
+# binary assets must never be normalised
+*.png binary
+*.jar binary
+*.ogg binary
+*.wav binary
+*.nbt binary
+*.zip binary
+
+# gradle wrapper keeps its own line endings
+gradlew text eol=lf
+gradlew.bat text eol=crlf
+*.sh text eol=lf

@@ -139,6 +139,7 @@ def do_upload(explicit: str | None) -> None:
     "version_number": "0.1.0",
     "changelog": read("CHANGELOG.md"),
     "version_type": "release",
+    "environment": "client_and_server",
     "game_versions": GAME_VERSIONS,
     "loaders": LOADERS,
     "dependencies": [{"project_id": FABRIC_API_PROJECT, "dependency_type": "required"}],

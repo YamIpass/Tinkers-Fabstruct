@@ -40,6 +40,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.material.Fluid;
+
+import javax.annotation.Nullable;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import slimeknights.mantle.datagen.MantleTags;
@@ -276,10 +278,10 @@ public final class TinkerFluids extends TinkerModule {
       if (!TConstruct.MOD_ID.equals(id.getNamespace())) {
         continue;
       }
-      FluidType type = PortingLibFluids.FLUID_TYPES.get(id);
+      FluidType type = lookupType(id);
       if (type == null && id.getPath().startsWith("flowing_")) {
         // flowing forms share the type of their still fluid
-        type = PortingLibFluids.FLUID_TYPES.get(TConstruct.getResource(id.getPath().substring("flowing_".length())));
+        type = lookupType(TConstruct.getResource(id.getPath().substring("flowing_".length())));
       }
       if (type != null) {
         FluidVariantAttributes.register(fluid, new FabricFluidTypeWrapper(type));
@@ -288,6 +290,19 @@ public final class TinkerFluids extends TinkerModule {
         FluidVariantAttributes.register(fluid, new NameOnlyFluidAttributes(TConstruct.makeDescriptionId("fluid", name)));
       }
     }
+  }
+
+  /**
+   * Looks a fluid type up without going through {@code Registry#get}, whose defaulted registry implementation throws
+   * when the entry is missing and the default value has not been installed yet (which happens when this runs before
+   * Porting Lib finishes its own initialization).
+   */
+  @Nullable
+  private static FluidType lookupType(ResourceLocation id) {
+    if (!PortingLibFluids.FLUID_TYPES.containsKey(id)) {
+      return null;
+    }
+    return PortingLibFluids.FLUID_TYPES.get(id);
   }
 
   /** Fallback attribute handler for fluids without a Porting Lib type, keeps the name key instead of a fabricated block key */

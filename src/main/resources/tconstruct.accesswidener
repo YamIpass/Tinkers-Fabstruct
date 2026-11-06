@@ -215,3 +215,5 @@ accessible field net/minecraft/world/level/block/Block item Lnet/minecraft/world
 mutable field net/minecraft/world/level/block/Block item Lnet/minecraft/world/item/Item;
 # the tab builder is package private, but the duplicate guard mixin needs to inspect the built contents
 accessible class net/minecraft/world/item/CreativeModeTab$ItemDisplayBuilder
+# development capture helper opens the creative inventory and selects one of the mod's tabs
+accessible method net/minecraft/client/gui/screens/inventory/CreativeModeInventoryScreen selectTab (Lnet/minecraft/world/item/CreativeModeTab;)V

@@ -1,0 +1,13 @@
+﻿Add-Type -AssemblyName System.Speech
+$ErrorActionPreference='Stop'
+$s=New-Object System.Speech.Synthesis.SpeechSynthesizer; $s.SelectVoice('Microsoft Huihui Desktop'); $s.Rate=2; $s.SetOutputToWaveFile('00.wav'); $s.Speak('匠魂，是 Minecraft 里最经典的老牌模组之一。从一个部件开始，自己锻出一把工具。'); $s.Dispose()
+$s=New-Object System.Speech.Synthesis.SpeechSynthesizer; $s.SelectVoice('Microsoft Huihui Desktop'); $s.Rate=2; $s.SetOutputToWaveFile('01.wav'); $s.Speak('可惜它一直只有 Forge 版本，而民间的移植大多停在很老的版本，bug 也不少。'); $s.Dispose()
+$s=New-Object System.Speech.Synthesis.SpeechSynthesizer; $s.SelectVoice('Microsoft Huihui Desktop'); $s.Rate=2; $s.SetOutputToWaveFile('02.wav'); $s.Speak('于是我们把匠魂 3.12.1 的源码，一个类一个类地搬到 Fabric 1.20.1 上。不是重做，是搬运。'); $s.Dispose()
+$s=New-Object System.Speech.Synthesis.SpeechSynthesizer; $s.SelectVoice('Microsoft Huihui Desktop'); $s.Rate=2; $s.SetOutputToWaveFile('03.wav'); $s.Speak('一千七百多个 Java 文件，七千多个编译错误，一段一段修干净。'); $s.Dispose()
+$s=New-Object System.Speech.Synthesis.SpeechSynthesizer; $s.SelectVoice('Microsoft Huihui Desktop'); $s.Rate=2; $s.SetOutputToWaveFile('04.wav'); $s.Speak('第一个难点，是 Forge 的自定义模型加载器。搬过来之后，满屏幕都是黑紫方块。'); $s.Dispose()
+$s=New-Object System.Speech.Synthesis.SpeechSynthesizer; $s.SelectVoice('Microsoft Huihui Desktop'); $s.Rate=2; $s.SetOutputToWaveFile('05.wav'); $s.Speak('第二个难点，是流体。Fabric 用 droplet，匠魂内部全是毫桶，所有换算都得重新接。'); $s.Dispose()
+$s=New-Object System.Speech.Synthesis.SpeechSynthesizer; $s.SelectVoice('Microsoft Huihui Desktop'); $s.Rate=2; $s.SetOutputToWaveFile('06.wav'); $s.Speak('第三个难点，是事务回调的顺序反了，铸造台永远不产出产物。'); $s.Dispose()
+$s=New-Object System.Speech.Synthesis.SpeechSynthesizer; $s.SelectVoice('Microsoft Huihui Desktop'); $s.Rate=2; $s.SetOutputToWaveFile('07.wav'); $s.Speak('把这些坑一个个填平之后，它们终于都动起来了。'); $s.Dispose()
+$s=New-Object System.Speech.Synthesis.SpeechSynthesizer; $s.SelectVoice('Microsoft Huihui Desktop'); $s.Rate=2; $s.SetOutputToWaveFile('08.wav'); $s.Speak('十三种工具，二十四种部件，强化系统，还有冶炼炉、铸造炉、熔化炉、龙头和排液口，全都在。'); $s.Dispose()
+$s=New-Object System.Speech.Synthesis.SpeechSynthesizer; $s.SelectVoice('Microsoft Huihui Desktop'); $s.Rate=2; $s.SetOutputToWaveFile('09.wav'); $s.Speak('现在它已经上线 GitHub 和 Modrinth，中文名叫匠魂织布。'); $s.Dispose()
+$s=New-Object System.Speech.Synthesis.SpeechSynthesizer; $s.SelectVoice('Microsoft Huihui Desktop'); $s.Rate=2; $s.SetOutputToWaveFile('10.wav'); $s.Speak('基于 MIT 许可的 Tinkers Construct 与 Mantle 移植，保留全部版权声明，与 SlimeKnights 没有隶属关系。'); $s.Dispose()

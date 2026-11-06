@@ -64,6 +64,10 @@ loom {
         useLegacyMixinAp = false
     }
     runs {
+        client {
+            // development helper: scripted capture run for marketing footage, -Pcapture
+            property 'tconstruct.capture', project.findProperty('capture') ?: 'false'
+        }
         server {
             property 'tconstruct.selftest', project.findProperty('selftest') ?: 'false'
             // stop the server once the self test finished, so `gradlew runServer -Pselftest` scores itself

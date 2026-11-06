@@ -128,6 +128,11 @@ public class TinkerClient {
     ModifierModel.LOADER.register(getResource("material_has_fallback"), MaterialHasFallbackModifierModel.LOADER);
     // specialized
     ModifierModel.LOADER.register(getResource("slimeskull"), SlimeskullModifierModel.LOADER);
+
+    // development helper: scripted in-game capture of the showcase world, see CaptureScenario
+    if (Boolean.getBoolean("tconstruct.capture")) {
+      slimeknights.tconstruct.shared.client.CaptureScenario.init();
+    }
   }
 
   /**

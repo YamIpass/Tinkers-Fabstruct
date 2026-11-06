@@ -28,3 +28,7 @@ __pycache__/
 # OS
 .DS_Store
 Thumbs.db
+docs/video/frames/
+docs/video/music.wav
+docs/video/voice_mix.wav
+docs/video/ffmpeg.log

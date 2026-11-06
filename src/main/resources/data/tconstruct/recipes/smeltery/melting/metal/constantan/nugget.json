@@ -1,0 +1,12 @@
+{
+  "type": "tconstruct:melting",
+  "ingredient": {
+    "tag": "forge:nuggets/constantan"
+  },
+  "result": {
+    "amount": 10,
+    "tag": "forge:molten_constantan"
+  },
+  "temperature": 920,
+  "time": 21
+}

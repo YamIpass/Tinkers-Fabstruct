@@ -1,0 +1,28 @@
+{
+  "type": "tconstruct:ore_melting",
+  "byproducts": [
+    {
+      "amount": 540,
+      "rate": "metal",
+      "tag": "forge:molten_gold"
+    }
+  ],
+  "ingredient": {
+    "fabric:type": "fabric:all",
+    "ingredients": [
+      {
+        "tag": "forge:ores/silver"
+      },
+      {
+        "tag": "forge:ore_rates/dense"
+      }
+    ]
+  },
+  "rate": "metal",
+  "result": {
+    "amount": 540,
+    "tag": "forge:molten_silver"
+  },
+  "temperature": 790,
+  "time": 269
+}

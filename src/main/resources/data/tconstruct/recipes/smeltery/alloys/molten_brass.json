@@ -1,0 +1,18 @@
+{
+  "type": "tconstruct:alloy",
+  "inputs": [
+    {
+      "amount": 90,
+      "tag": "forge:molten_copper"
+    },
+    {
+      "amount": 90,
+      "tag": "forge:molten_zinc"
+    }
+  ],
+  "result": {
+    "amount": 180,
+    "tag": "forge:molten_brass"
+  },
+  "temperature": 605
+}

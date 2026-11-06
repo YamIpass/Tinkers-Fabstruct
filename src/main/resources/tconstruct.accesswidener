@@ -1,0 +1,217 @@
+accessWidener v2 named
+
+# Item Frames
+transitive-extendable method net/minecraft/world/entity/decoration/ItemFrame setRotation (IZ)V
+
+# Reflecting modifier
+transitive-accessible field net/minecraft/world/entity/projectile/Projectile leftOwner Z
+
+# Loot table datagen
+
+transitive-accessible field net/minecraft/advancements/critereon/EntityEquipmentPredicate$Builder mainhand Lnet/minecraft/advancements/critereon/ItemPredicate;
+
+transitive-accessible field net/minecraft/data/loot/BlockLootSubProvider HAS_NO_SHEARS_OR_SILK_TOUCH Lnet/minecraft/world/level/storage/loot/predicates/LootItemCondition$Builder;
+
+# Heads
+transitive-accessible field net/minecraft/world/item/crafting/FireworkStarRecipe SHAPE_BY_ITEM Ljava/util/Map;
+
+# Tile entity type injection
+transitive-accessible field net/minecraft/world/level/block/entity/BlockEntityType validBlocks Ljava/util/Set;
+
+# Making things flammable
+transitive-accessible method net/minecraft/world/level/block/FireBlock setFlammable (Lnet/minecraft/world/level/block/Block;II)V
+
+# Mojang added a private getter for text fields private variable
+accessible method net/minecraft/client/gui/components/EditBox isEditable ()Z
+
+transitive-accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen imageWidth I
+transitive-accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen imageHeight I
+transitive-accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen leftPos I
+transitive-accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen topPos I
+
+# Fabric
+transitive-mutable field net/minecraft/world/level/block/entity/BlockEntityType validBlocks Ljava/util/Set;
+transitive-mutable field net/minecraft/world/level/storage/loot/LootPool entries [Lnet/minecraft/world/level/storage/loot/entries/LootPoolEntryContainer;
+transitive-accessible field net/minecraft/client/renderer/blockentity/SkullBlockRenderer SKIN_BY_TYPE Ljava/util/Map;
+transitive-accessible field net/minecraft/client/model/geom/ModelLayers ALL_MODELS Ljava/util/Set;
+transitive-accessible field net/minecraft/world/level/storage/loot/LootPool entries [Lnet/minecraft/world/level/storage/loot/entries/LootPoolEntryContainer;
+transitive-accessible field net/minecraft/world/level/storage/loot/LootTable pools [Lnet/minecraft/world/level/storage/loot/LootPool;
+transitive-accessible method net/minecraft/world/level/block/SkullBlock <init> (Lnet/minecraft/world/level/block/SkullBlock$Type;Lnet/minecraft/world/level/block/state/BlockBehaviour$Properties;)V
+transitive-accessible method net/minecraft/world/level/block/WallSkullBlock <init> (Lnet/minecraft/world/level/block/SkullBlock$Type;Lnet/minecraft/world/level/block/state/BlockBehaviour$Properties;)V
+transitive-accessible method net/minecraft/world/level/block/IronBarsBlock <init> (Lnet/minecraft/world/level/block/state/BlockBehaviour$Properties;)V
+transitive-accessible method net/minecraft/world/item/crafting/Ingredient valueFromJson (Lcom/google/gson/JsonObject;)Lnet/minecraft/world/item/crafting/Ingredient$Value;
+transitive-accessible method net/minecraft/resources/ResourceLocation isValidNamespace (Ljava/lang/String;)Z
+transitive-accessible method net/minecraft/resources/ResourceLocation isValidPath (Ljava/lang/String;)Z
+transitive-accessible method net/minecraft/network/protocol/game/ClientboundBlockEntityDataPacket <init> (Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/entity/BlockEntityType;Lnet/minecraft/nbt/CompoundTag;)V
+transitive-accessible method net/minecraft/world/entity/player/Player closeContainer ()V
+transitive-accessible method net/minecraft/client/renderer/LevelRenderer renderShape (Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;Lnet/minecraft/world/phys/shapes/VoxelShape;DDDFFFF)V
+transitive-accessible method net/minecraft/client/renderer/LevelRenderer renderHitOutline (Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;Lnet/minecraft/world/entity/Entity;DDDLnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;)V
+transitive-accessible method net/minecraft/world/level/block/Blocks never (Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)Z
+transitive-accessible method net/minecraft/world/level/block/Block popExperience (Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/core/BlockPos;I)V
+transitive-accessible method net/minecraft/client/renderer/ItemInHandRenderer renderPlayerArm (Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;IFFLnet/minecraft/world/entity/HumanoidArm;)V
+transitive-accessible method net/minecraft/world/level/levelgen/feature/stateproviders/BlockStateProviderType <init> (Lcom/mojang/serialization/Codec;)V
+transitive-accessible method net/minecraft/world/level/storage/loot/functions/ApplyBonusCount$Formula calculateNewCount (Lnet/minecraft/util/RandomSource;II)I
+transitive-accessible method net/minecraft/world/level/storage/loot/functions/ApplyBonusCount$FormulaDeserializer deserialize (Lcom/google/gson/JsonObject;Lcom/google/gson/JsonDeserializationContext;)Lnet/minecraft/world/level/storage/loot/functions/ApplyBonusCount$Formula;
+transitive-accessible method net/minecraft/world/level/storage/loot/functions/ApplyBonusCount$OreDrops <init> ()V
+transitive-accessible field net/minecraft/world/level/storage/loot/functions/ApplyBonusCount FORMULAS Ljava/util/Map;
+transitive-accessible field net/minecraft/world/effect/MobEffectInstance duration I
+transitive-accessible field net/minecraft/client/renderer/LevelRenderer renderBuffers Lnet/minecraft/client/renderer/RenderBuffers;
+transitive-accessible field net/minecraft/client/renderer/LevelRenderer destroyingBlocks Lit/unimi/dsi/fastutil/ints/Int2ObjectMap;
+transitive-accessible field net/minecraft/client/Minecraft fontManager Lnet/minecraft/client/gui/font/FontManager;
+transitive-accessible field net/minecraft/world/inventory/ResultSlot removeCount I
+transitive-accessible field net/minecraft/world/inventory/ResultSlot player Lnet/minecraft/world/entity/player/Player;
+transitive-accessible field net/minecraft/world/entity/Entity wasEyeInWater Z
+transitive-accessible field net/minecraft/client/gui/font/FontManager fontSets Ljava/util/Map;
+transitive-accessible field net/minecraft/world/entity/LivingEntity lastHurt F
+transitive-accessible field net/minecraft/client/renderer/RenderType$CompositeState textureState Lnet/minecraft/client/renderer/RenderStateShard$EmptyTextureStateShard;
+transitive-accessible field net/minecraft/client/renderer/RenderType$CompositeRenderType state Lnet/minecraft/client/renderer/RenderType$CompositeState;
+transitive-accessible field net/minecraft/client/renderer/RenderStateShard name Ljava/lang/String;
+transitive-accessible field net/minecraft/client/renderer/RenderStateShard$TextureStateShard texture Ljava/util/Optional;
+transitive-accessible field net/minecraft/world/level/Explosion x D
+transitive-accessible field net/minecraft/world/level/Explosion y D
+transitive-accessible field net/minecraft/world/level/Explosion z D
+transitive-accessible field net/minecraft/world/level/Explosion radius F
+transitive-accessible field net/minecraft/world/level/Explosion toBlow Lit/unimi/dsi/fastutil/objects/ObjectArrayList;
+transitive-accessible field net/minecraft/world/level/Explosion blockInteraction Lnet/minecraft/world/level/Explosion$BlockInteraction;
+transitive-mutable field net/minecraft/world/level/Explosion blockInteraction Lnet/minecraft/world/level/Explosion$BlockInteraction;
+transitive-accessible class net/minecraft/client/renderer/RenderStateShard$TextureStateShard
+transitive-accessible class net/minecraft/world/level/storage/loot/functions/ApplyBonusCount$BinomialWithBonusCount
+transitive-accessible class net/minecraft/world/level/storage/loot/functions/ApplyBonusCount$Formula
+transitive-accessible class net/minecraft/world/level/storage/loot/functions/ApplyBonusCount$FormulaDeserializer
+transitive-accessible class net/minecraft/world/level/storage/loot/functions/ApplyBonusCount$OreDrops
+transitive-accessible class net/minecraft/world/level/storage/loot/functions/ApplyBonusCount$UniformBonusCount
+accessible field net/minecraft/world/item/ArmorItem ARMOR_MODIFIER_UUID_PER_TYPE Ljava/util/EnumMap;
+
+
+transitive-accessible method net/minecraft/world/level/block/BeehiveBlock angerNearbyBees (Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;)V
+transitive-accessible method net/minecraft/world/level/block/BeehiveBlock hiveContainsBees (Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;)Z
+transitive-accessible method net/minecraft/world/item/context/UseOnContext getHitResult ()Lnet/minecraft/world/phys/BlockHitResult;
+transitive-accessible method net/minecraft/client/particle/BreakingItemParticle <init> (Lnet/minecraft/client/multiplayer/ClientLevel;DDDDDDLnet/minecraft/world/item/ItemStack;)V
+transitive-accessible field net/minecraft/world/entity/decoration/ItemFrame DATA_ROTATION Lnet/minecraft/network/syncher/EntityDataAccessor;
+transitive-accessible field net/minecraft/world/level/Explosion level Lnet/minecraft/world/level/Level;
+transitive-accessible field net/minecraft/world/level/Explosion source Lnet/minecraft/world/entity/Entity;
+transitive-accessible field net/minecraft/client/gui/screens/Screen renderables Ljava/util/List;
+
+transitive-accessible class net/minecraft/client/renderer/block/model/ItemTransform$Deserializer
+transitive-accessible field net/minecraft/client/renderer/block/model/ItemTransform$Deserializer DEFAULT_ROTATION Lorg/joml/Vector3f;
+transitive-accessible field net/minecraft/client/renderer/block/model/ItemTransform$Deserializer DEFAULT_TRANSLATION Lorg/joml/Vector3f;
+transitive-accessible field net/minecraft/client/renderer/block/model/ItemTransform$Deserializer DEFAULT_SCALE Lorg/joml/Vector3f;
+
+transitive-accessible field net/minecraft/client/renderer/block/model/BlockModel$GuiLight name Ljava/lang/String;
+
+transitive-accessible field net/minecraft/world/item/Item BASE_ATTACK_DAMAGE_UUID Ljava/util/UUID;
+transitive-accessible field net/minecraft/world/item/Item BASE_ATTACK_SPEED_UUID Ljava/util/UUID;
+
+transitive-accessible method net/minecraft/world/level/biome/Biome getTemperature (Lnet/minecraft/core/BlockPos;)F
+
+transitive-accessible field net/minecraft/client/renderer/entity/layers/HumanoidArmorLayer ARMOR_LOCATION_CACHE Ljava/util/Map;
+
+transitive-accessible field net/minecraft/world/item/ArmorItem ARMOR_MODIFIER_UUID_PER_TYPE Ljava/util/EnumMap;
+
+transitive-accessible field net/minecraft/client/renderer/entity/layers/CustomHeadLayer skullModels Ljava/util/Map;
+transitive-mutable field net/minecraft/client/renderer/entity/layers/CustomHeadLayer skullModels Ljava/util/Map;
+
+transitive-accessible field net/minecraft/client/renderer/blockentity/SkullBlockRenderer modelByType Ljava/util/Map;
+transitive-mutable field net/minecraft/client/renderer/blockentity/SkullBlockRenderer modelByType Ljava/util/Map;
+
+transitive-accessible field net/minecraft/client/renderer/entity/ItemRenderer blockEntityRenderer Lnet/minecraft/client/renderer/BlockEntityWithoutLevelRenderer;
+transitive-accessible field net/minecraft/client/renderer/BlockEntityWithoutLevelRenderer skullModels Ljava/util/Map;
+
+transitive-accessible field net/minecraft/client/renderer/blockentity/BlockEntityRenderDispatcher renderers Ljava/util/Map;
+transitive-accessible field net/minecraft/client/renderer/entity/EntityRenderDispatcher renderers Ljava/util/Map;
+transitive-accessible field net/minecraft/client/renderer/entity/EntityRenderDispatcher playerRenderers Ljava/util/Map;
+
+transitive-accessible field net/minecraft/client/resources/model/ModelManager bakedRegistry Ljava/util/Map;
+
+transitive-accessible field net/minecraft/client/renderer/entity/ItemFrameRenderer itemRenderer Lnet/minecraft/client/renderer/entity/ItemRenderer;
+
+transitive-accessible field net/minecraft/client/renderer/entity/LivingEntityRenderer layers Ljava/util/List;
+
+transitive-accessible field net/minecraft/world/item/context/BlockPlaceContext replaceClicked Z
+transitive-accessible method net/minecraft/world/item/context/BlockPlaceContext <init> (Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/phys/BlockHitResult;)V
+
+transitive-accessible method net/minecraft/client/renderer/block/model/BlockElement uvsByFace (Lnet/minecraft/core/Direction;)[F
+
+transitive-accessible method net/minecraft/world/item/crafting/Ingredient$TagValue <init> (Lnet/minecraft/tags/TagKey;)V
+
+transitive-accessible field net/minecraft/world/item/ItemStack tag Lnet/minecraft/nbt/CompoundTag;
+
+transitive-accessible field net/minecraft/world/item/alchemy/PotionBrewing$Mix to Ljava/lang/Object;
+transitive-accessible field net/minecraft/world/item/alchemy/PotionBrewing$Mix from Ljava/lang/Object;
+transitive-accessible field net/minecraft/world/item/alchemy/PotionBrewing$Mix ingredient Lnet/minecraft/world/item/crafting/Ingredient;
+
+accessible field net/minecraft/world/entity/projectile/AbstractArrow piercingIgnoreEntityIds Lit/unimi/dsi/fastutil/ints/IntOpenHashSet;
+accessible field net/minecraft/world/entity/projectile/AbstractArrow piercedAndKilledEntities Ljava/util/List;
+accessible field net/minecraft/world/entity/projectile/AbstractArrow soundEvent Lnet/minecraft/sounds/SoundEvent;
+accessible method net/minecraft/world/entity/projectile/AbstractArrow doPostHurtEffects (Lnet/minecraft/world/entity/LivingEntity;)V
+accessible method net/minecraft/world/entity/projectile/AbstractArrow getPickupItem ()Lnet/minecraft/world/item/ItemStack;
+accessible field net/minecraft/client/renderer/item/ItemProperties PROPERTIES Ljava/util/Map;
+
+accessible method net/minecraft/commands/synchronization/ArgumentTypeInfos register (Lnet/minecraft/core/Registry;Ljava/lang/String;Ljava/lang/Class;Lnet/minecraft/commands/synchronization/ArgumentTypeInfo;)Lnet/minecraft/commands/synchronization/ArgumentTypeInfo;
+accessible method com/mojang/blaze3d/platform/NativeImage writeToChannel (Ljava/nio/channels/WritableByteChannel;)Z
+
+
+accessible method net/minecraft/world/level/levelgen/feature/HugeFungusFeature placeStem (Lnet/minecraft/world/level/WorldGenLevel;Lnet/minecraft/util/RandomSource;Lnet/minecraft/world/level/levelgen/feature/HugeFungusConfiguration;Lnet/minecraft/core/BlockPos;IZ)V
+accessible method net/minecraft/world/level/levelgen/feature/HugeFungusFeature placeHat (Lnet/minecraft/world/level/WorldGenLevel;Lnet/minecraft/util/RandomSource;Lnet/minecraft/world/level/levelgen/feature/HugeFungusConfiguration;Lnet/minecraft/core/BlockPos;IZ)V
+
+accessible method net/minecraft/client/gui/GuiGraphics flushIfUnmanaged ()V
+
+accessible method net/minecraft/world/level/block/TntBlock explode (Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/entity/LivingEntity;)V
+
+# Fire/blast protection slot tweaks in Config (Forge used an access transformer to un-final this field)
+accessible field net/minecraft/world/item/enchantment/Enchantment slots [Lnet/minecraft/world/entity/EquipmentSlot;
+mutable field net/minecraft/world/item/enchantment/Enchantment slots [Lnet/minecraft/world/entity/EquipmentSlot;
+
+# Fancy armor stands must drop the correct stand item (Forge exposed these as protected)
+accessible method net/minecraft/world/entity/decoration/ArmorStand brokenByPlayer (Lnet/minecraft/world/damagesource/DamageSource;)V
+accessible method net/minecraft/world/entity/decoration/ArmorStand brokenByAnything (Lnet/minecraft/world/damagesource/DamageSource;)V
+
+# --- private/protected vanilla members the upstream 3.12.1 code uses (Forge exposed them through access transformers) ---
+accessible field net/minecraft/world/entity/projectile/ThrownTrident tridentItem Lnet/minecraft/world/item/ItemStack;
+accessible field net/minecraft/world/entity/projectile/ThrownTrident dealtDamage Z
+accessible field net/minecraft/world/entity/projectile/ThrownTrident ID_LOYALTY Lnet/minecraft/network/syncher/EntityDataAccessor;
+accessible field net/minecraft/world/entity/projectile/ThrownTrident ID_FOIL Lnet/minecraft/network/syncher/EntityDataAccessor;
+accessible method net/minecraft/world/entity/projectile/ThrownTrident getPickupItem ()Lnet/minecraft/world/item/ItemStack;
+accessible field net/minecraft/world/entity/projectile/AbstractArrow life I
+accessible method net/minecraft/world/entity/projectile/AbstractArrow getPickupItem ()Lnet/minecraft/world/item/ItemStack;
+accessible field net/minecraft/world/entity/projectile/FishingHook life I
+accessible field net/minecraft/world/inventory/AbstractContainerMenu menuType Lnet/minecraft/world/inventory/MenuType;
+accessible field net/minecraft/world/level/Explosion fire Z
+accessible field net/minecraft/world/level/Explosion hitPlayers Ljava/util/Map;
+accessible field net/minecraft/world/level/Explosion damageCalculator Lnet/minecraft/world/level/ExplosionDamageCalculator;
+accessible field net/minecraft/world/level/block/state/properties/IntegerProperty min I
+accessible field net/minecraft/world/level/block/state/properties/IntegerProperty max I
+accessible field net/minecraft/world/entity/item/ItemEntity pickupDelay I
+accessible field net/minecraft/client/renderer/ItemInHandRenderer MAP_BACKGROUND Lnet/minecraft/client/renderer/RenderType;
+accessible field net/minecraft/client/renderer/ItemInHandRenderer MAP_BACKGROUND_CHECKERBOARD Lnet/minecraft/client/renderer/RenderType;
+accessible field net/minecraft/resources/ResourceLocation ERROR_INVALID Lcom/mojang/brigadier/exceptions/SimpleCommandExceptionType;
+accessible field net/minecraft/client/gui/screens/Screen font Lnet/minecraft/client/gui/Font;
+accessible field net/minecraft/world/level/levelgen/feature/rootplacers/MangroveRootPlacer mangroveRootPlacement Lnet/minecraft/world/level/levelgen/feature/rootplacers/MangroveRootPlacement;
+accessible method net/minecraft/client/gui/Gui renderSlot (Lnet/minecraft/client/gui/GuiGraphics;IIFLnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/item/ItemStack;I)V
+accessible method net/minecraft/world/item/crafting/RecipeManager byType (Lnet/minecraft/world/item/crafting/RecipeType;)Ljava/util/Map;
+accessible method net/minecraft/world/entity/LivingEntity spawnItemParticles (Lnet/minecraft/world/item/ItemStack;I)V
+accessible method net/minecraft/client/renderer/entity/ItemRenderer renderModelLists (Lnet/minecraft/client/resources/model/BakedModel;Lnet/minecraft/world/item/ItemStack;IILcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;)V
+accessible method net/minecraft/client/renderer/entity/FishingHookRenderer stringVertex (FFFLcom/mojang/blaze3d/vertex/VertexConsumer;Lcom/mojang/blaze3d/vertex/PoseStack$Pose;FF)V
+accessible method net/minecraft/world/inventory/CraftingMenu slotChangedCraftingGrid (Lnet/minecraft/world/inventory/AbstractContainerMenu;Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/inventory/CraftingContainer;Lnet/minecraft/world/inventory/ResultContainer;)V
+accessible method net/minecraft/client/renderer/texture/atlas/SpriteSources register (Ljava/lang/String;Lcom/mojang/serialization/Codec;)Lnet/minecraft/client/renderer/texture/atlas/SpriteSourceType;
+accessible method net/minecraft/client/resources/TextureAtlasHolder getSprite (Lnet/minecraft/resources/ResourceLocation;)Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;
+
+# vanilla recipe members Forge widened through access transformers, needed by the shaped/shapeless material recipes
+accessible field net/minecraft/world/item/crafting/ShapedRecipe result Lnet/minecraft/world/item/ItemStack;
+accessible method net/minecraft/world/item/crafting/ShapedRecipe dissolvePattern ([Ljava/lang/String;Ljava/util/Map;II)Lnet/minecraft/core/NonNullList;
+accessible method net/minecraft/world/item/crafting/ShapedRecipe shrink ([Ljava/lang/String;)[Ljava/lang/String;
+accessible method net/minecraft/world/item/crafting/ShapedRecipe patternFromJson (Lcom/google/gson/JsonArray;)[Ljava/lang/String;
+accessible method net/minecraft/world/item/crafting/ShapedRecipe keyFromJson (Lcom/google/gson/JsonObject;)Ljava/util/Map;
+accessible field net/minecraft/world/item/crafting/ShapelessRecipe result Lnet/minecraft/world/item/ItemStack;
+
+# Spawn placements: Forge's SpawnPlacementRegisterEvent could replace vanilla entries (operation OR); vanilla refuses
+# duplicates, so we write the merged entry straight into the (private) registry map.
+accessible field net/minecraft/world/entity/SpawnPlacements DATA_BY_TYPE Ljava/util/Map;
+accessible class net/minecraft/world/entity/SpawnPlacements$Data
+accessible method net/minecraft/world/entity/SpawnPlacements$Data <init> (Lnet/minecraft/world/level/levelgen/Heightmap$Types;Lnet/minecraft/world/entity/SpawnPlacements$Type;Lnet/minecraft/world/entity/SpawnPlacements$SpawnPredicate;)V
+# Forge links a block to its block item in the BlockItem constructor; on Fabric that link is missing,
+# so Block.asItem() is air for every modded block. The mixin BlockItemMixin restores the link.
+accessible field net/minecraft/world/level/block/Block item Lnet/minecraft/world/item/Item;
+mutable field net/minecraft/world/level/block/Block item Lnet/minecraft/world/item/Item;
+# the tab builder is package private, but the duplicate guard mixin needs to inspect the built contents
+accessible class net/minecraft/world/item/CreativeModeTab$ItemDisplayBuilder

@@ -1,0 +1,19 @@
+{
+  "type": "tconstruct:molding_table",
+  "material": {
+    "tag": "tconstruct:casts/red_sand"
+  },
+  "pattern": {
+    "fabric:type": "fabric:any",
+    "ingredients": [
+      {
+        "item": "tconstruct:leggings_plating",
+        "fabric:type": "tconstruct:material"
+      },
+      {
+        "item": "tconstruct:leggings_plating_dummy"
+      }
+    ]
+  },
+  "result": "tconstruct:leggings_plating_red_sand_cast"
+}

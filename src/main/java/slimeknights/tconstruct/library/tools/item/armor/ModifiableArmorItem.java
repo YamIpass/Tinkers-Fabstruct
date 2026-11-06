@@ -1,0 +1,440 @@
+package slimeknights.tconstruct.library.tools.item.armor;
+
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Multimap;
+import lombok.Getter;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.SlotAccess;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.monster.EnderMan;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.ClickAction;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.ArmorMaterial;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Rarity;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.level.Level;
+import io.github.fabricators_of_create.porting_lib.enchant.CustomEnchantingBehaviorItem;
+import io.github.fabricators_of_create.porting_lib.item.CustomEnchantmentLevelItem;
+import io.github.fabricators_of_create.porting_lib.item.CustomEnchantmentsItem;
+import io.github.fabricators_of_create.porting_lib.item.CustomMaxCountItem;
+import io.github.fabricators_of_create.porting_lib.item.DamageableItem;
+import io.github.fabricators_of_create.porting_lib.item.PiglinsNeutralItem;
+import io.github.fabricators_of_create.porting_lib.item.WalkOnSnowItem;
+import io.github.fabricators_of_create.porting_lib.tool.ToolAction;
+import io.github.fabricators_of_create.porting_lib.tool.addons.ToolActionItem;
+import io.github.fabricators_of_create.porting_lib.transfer.item.ItemItemStorages;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
+import slimeknights.mantle.client.SafeClientAccess;
+import slimeknights.mantle.client.TooltipKey;
+import slimeknights.tconstruct.TConstruct;
+import slimeknights.tconstruct.library.modifiers.ModifierEntry;
+import slimeknights.tconstruct.library.modifiers.ModifierHooks;
+import slimeknights.tconstruct.library.modifiers.hook.behavior.EnchantmentModifierHook;
+import slimeknights.tconstruct.library.modifiers.hook.display.DurabilityDisplayModifierHook;
+import slimeknights.tconstruct.library.modifiers.hook.interaction.SlotStackModifierHook;
+import slimeknights.tconstruct.library.modifiers.modules.build.RarityModule;
+import slimeknights.tconstruct.library.tools.IndestructibleItemEntity;
+import slimeknights.tconstruct.library.tools.capability.fluid.ToolFluidCapability;
+import slimeknights.tconstruct.library.tools.capability.inventory.ToolInventoryCapability;
+import slimeknights.tconstruct.library.tools.definition.ModifiableArmorMaterial;
+import slimeknights.tconstruct.library.tools.definition.ToolDefinition;
+import slimeknights.tconstruct.library.tools.definition.module.display.ToolNameHook;
+import slimeknights.tconstruct.library.tools.helper.ModifierUtil;
+import slimeknights.tconstruct.library.tools.helper.ToolBuildHandler;
+import slimeknights.tconstruct.library.tools.helper.ToolDamageUtil;
+import slimeknights.tconstruct.library.tools.helper.TooltipUtil;
+import slimeknights.tconstruct.library.tools.item.IModifiableDisplay;
+import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
+import slimeknights.tconstruct.library.tools.nbt.StatsNBT;
+import slimeknights.tconstruct.library.tools.nbt.ToolStack;
+import slimeknights.tconstruct.library.tools.stat.ToolStats;
+import slimeknights.tconstruct.library.utils.Util;
+
+import javax.annotation.Nullable;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+
+public class ModifiableArmorItem extends ArmorItem implements IModifiableDisplay, CustomEnchantingBehaviorItem, CustomEnchantmentLevelItem,
+                                        CustomEnchantmentsItem, CustomMaxCountItem, DamageableItem, PiglinsNeutralItem, ToolActionItem,
+                                        WalkOnSnowItem {
+  /** Volatile modifier tag to make piglins neutal when worn */
+  public static final ResourceLocation PIGLIN_NEUTRAL = TConstruct.getResource("piglin_neutral");
+  /** Volatile modifier tag to make this item an elytra */
+  public static final ResourceLocation ELYTRA = TConstruct.getResource("elyta");
+  /** Volatile flag for a boot item to walk on powdered snow. Cold immunity is handled through a tag */
+  public static final ResourceLocation SNOW_BOOTS = TConstruct.getResource("snow_boots");
+  /** Volatile flag for an item to act as an enderman mask, stopping them from getting angry. */
+  public static final ResourceLocation ENDERMASK = TConstruct.getResource("endermask");
+
+  @Getter
+  private final ToolDefinition toolDefinition;
+  /** Cache of the tool built for rendering */
+  private ItemStack toolForRendering = null;
+  public ModifiableArmorItem(ArmorMaterial materialIn, ArmorItem.Type type, Properties builderIn, ToolDefinition toolDefinition) {
+    super(materialIn, type, builderIn);
+    this.toolDefinition = toolDefinition;
+    // TODO(fabric): Forge capabilities are replaced by Fabric item lookups, registered directly on the item
+    FluidStorage.ITEM.registerForItems((itemStack, context) -> new ToolFluidCapability(itemStack, () -> ToolStack.from(itemStack)), this);
+    ItemItemStorages.ITEM.registerForItems((itemStack, context) -> ToolInventoryCapability.getCap(context, itemStack), this);
+  }
+
+  public ModifiableArmorItem(ModifiableArmorMaterial material, ArmorItem.Type type, Properties properties) {
+    this(material, type, properties, Objects.requireNonNull(material.getArmorDefinition(type), "Missing tool definition for " + type.getName()));
+  }
+
+  /* Basic properties */
+
+  @Override
+  public int getItemStackLimit(ItemStack stack) {
+    return 1;
+  }
+
+  @Override
+  public boolean makesPiglinsNeutral(ItemStack stack, LivingEntity wearer) {
+    return ModifierUtil.checkVolatileFlag(stack, PIGLIN_NEUTRAL);
+  }
+
+  @Override
+  public boolean canWalkOnPowderedSnow(ItemStack stack, LivingEntity wearer) {
+    return type == Type.BOOTS && ModifierUtil.checkVolatileFlag(stack, SNOW_BOOTS);
+  }
+
+  // TODO(fabric): Forge's IForgeItem#isEnderMask has no Fabric equivalent, enderman anger ignores this without a mixin
+  public boolean isEnderMask(ItemStack stack, Player player, EnderMan endermanEntity) {
+    return type == Type.HELMET && ModifierUtil.checkVolatileFlag(stack, ENDERMASK);
+  }
+
+  @Override
+  public boolean canPerformAction(ItemStack stack, ToolAction toolAction) {
+    return ModifierUtil.canPerformAction(ToolStack.from(stack), toolAction);
+  }
+
+  // TODO(fabric): Forge's IForgeItem#isNotReplaceableByPickAction has no Fabric equivalent, kept as a plain helper
+  public boolean isNotReplaceableByPickAction(ItemStack stack, Player player, int inventorySlot) {
+    return true;
+  }
+
+
+  /* Enchantments */
+
+  @Override
+  public boolean isEnchantable(ItemStack stack) {
+    return false;
+  }
+
+  @Override
+  public boolean isBookEnchantable(ItemStack stack, ItemStack book) {
+    return false;
+  }
+
+  @Override
+  public boolean canApplyAtEnchantingTable(ItemStack stack, Enchantment enchantment) {
+    return enchantment.isCurse() && CustomEnchantingBehaviorItem.super.canApplyAtEnchantingTable(stack, enchantment);
+  }
+
+  // TODO(fabric): Forge's Item#getEnchantmentLevel hook is gone, Porting Lib patches EnchantmentHelper instead; the
+  //  incoming level is ignored as tinkers armor computes its level from modifiers
+  @Override
+  public int modifyEnchantmentLevel(ItemStack stack, Enchantment enchantment, int level) {
+    return EnchantmentModifierHook.getEnchantmentLevel(stack, enchantment);
+  }
+
+  @Override
+  public void modifyEnchantments(Map<Enchantment,Integer> enchantments, ItemStack stack) {
+    EnchantmentModifierHook.getAllEnchantments(stack, enchantments);
+  }
+
+
+  /* Loading */
+
+  // TODO(fabric): Forge initCapabilities has no Fabric equivalent, the item lookups are registered in the item constructor
+
+  @Override
+  public void verifyTagAfterLoad(CompoundTag nbt) {
+    ToolStack.verifyTag(this, nbt, getToolDefinition());
+  }
+
+  @Override
+  public void onCraftedBy(ItemStack stack, Level levelIn, Player playerIn) {
+    ToolStack.ensureInitialized(stack, getToolDefinition());
+  }
+
+  @Override
+  public InteractionResultHolder<ItemStack> use(Level levelIn, Player playerIn, InteractionHand handIn) {
+    if (playerIn.isCrouching()) {
+      ItemStack stack = playerIn.getItemInHand(handIn);
+      InteractionResult result = ToolInventoryCapability.tryOpenContainer(stack, null, getToolDefinition(), playerIn, Util.getSlotType(handIn));
+      if (result.consumesAction()) {
+        return new InteractionResultHolder<>(result, stack);
+      }
+    }
+    return super.use(levelIn, playerIn, handIn);
+  }
+
+
+  /* Display */
+
+  @Override
+  public boolean isFoil(ItemStack stack) {
+    // we use enchantments to handle some modifiers, so don't glow from them
+    // however, if a modifier wants to glow let them
+    return ModifierUtil.checkVolatileFlag(stack, SHINY);
+  }
+
+  @Override
+  public Rarity getRarity(ItemStack stack) {
+    return RarityModule.getRarity(stack);
+  }
+
+
+  /* Item entity */
+
+  @Override
+  public boolean hasCustomEntity(ItemStack stack) {
+    return IndestructibleItemEntity.hasCustomEntity(stack);
+  }
+
+  @Nullable
+  @Override
+  public Entity createEntity(Level level, Entity original, ItemStack stack) {
+    return IndestructibleItemEntity.createFrom(level, original, stack);
+  }
+
+  @Deprecated
+  @Override
+  public void onDestroyed(ItemEntity entity) {
+    ToolInventoryCapability.onDestroyed(entity);
+  }
+
+
+  /* Damage/Durability */
+
+  // TODO(fabric): Forge's Item#isRepairable hook has no Fabric equivalent (Porting Lib's RepairableItem was removed in
+  //  2.3.16), tinkers armor is fixed in the tinker station instead
+  public boolean isRepairable(ItemStack stack) {
+    // handle in the tinker station
+    return false;
+  }
+
+  @Override
+  public boolean canBeDepleted() {
+    return true;
+  }
+
+  @Override
+  public int getMaxDamage(ItemStack stack) {
+    return ToolDamageUtil.getFakeMaxDamage(stack);
+  }
+
+  @Override
+  public int getDamage(ItemStack stack) {
+    if (!canBeDepleted()) {
+      return 0;
+    }
+    return ToolStack.from(stack).getDamage();
+  }
+
+  @Override
+  public void setDamage(ItemStack stack, int damage) {
+    if (canBeDepleted()) {
+      ToolStack.from(stack).setDamage(damage);
+    }
+  }
+
+  // TODO(fabric): Fabric's ItemStack#hurtAndBreak never calls this, so it is only a plain helper; the armor damage
+  //  paths go through ToolDamageUtil, restoring the vanilla hook would need a mixin on ItemStack#hurtAndBreak
+  public <T extends LivingEntity> int damageItem(ItemStack stack, int amount, T damager, Consumer<T> onBroken) {
+    // We basically emulate Itemstack.damageItem here. We always return 0 to skip the handling in ItemStack.
+    // If we don't tools ignore our damage logic
+    if (canBeDepleted() && ToolDamageUtil.damage(ToolStack.from(stack), amount, damager, stack)) {
+      onBroken.accept(damager);
+    }
+
+    return 0;
+  }
+
+
+  /* Durability display */
+
+  @Override
+  public boolean isBarVisible(ItemStack pStack) {
+    return DurabilityDisplayModifierHook.showDurabilityBar(pStack);
+  }
+
+  @Override
+  public int getBarColor(ItemStack pStack) {
+    return DurabilityDisplayModifierHook.getDurabilityRGB(pStack);
+  }
+
+  @Override
+  public int getBarWidth(ItemStack pStack) {
+    return DurabilityDisplayModifierHook.getDurabilityWidth(pStack);
+  }
+
+
+  /* Armor properties */
+
+  @Override
+  public boolean isValidRepairItem(ItemStack toRepair, ItemStack repair) {
+    return false;
+  }
+
+
+  @Override
+  public Multimap<Attribute,AttributeModifier> getAttributeModifiers(IToolStackView tool, EquipmentSlot slot) {
+    if (slot != getEquipmentSlot()) {
+      return ImmutableMultimap.of();
+    }
+
+    ImmutableMultimap.Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
+    if (!tool.isBroken()) {
+      // base stats
+      StatsNBT statsNBT = tool.getStats();
+      UUID uuid = ARMOR_MODIFIER_UUID_PER_TYPE.get(type);
+      float armor = statsNBT.get(ToolStats.ARMOR);
+      if (armor > 0) {
+        builder.put(Attributes.ARMOR, new AttributeModifier(uuid, "tconstruct.armor.armor", armor, AttributeModifier.Operation.ADDITION));
+      }
+      float toughness = statsNBT.get(ToolStats.ARMOR_TOUGHNESS);
+      if (toughness > 0) {
+        builder.put(Attributes.ARMOR_TOUGHNESS, new AttributeModifier(uuid, "tconstruct.armor.toughness", toughness, AttributeModifier.Operation.ADDITION));
+      }
+      double knockbackResistance = statsNBT.get(ToolStats.KNOCKBACK_RESISTANCE);
+      if (knockbackResistance > 0) {
+        builder.put(Attributes.KNOCKBACK_RESISTANCE, new AttributeModifier(uuid, "tconstruct.armor.knockback_resistance", knockbackResistance, AttributeModifier.Operation.ADDITION));
+      }
+      // grab attributes from modifiers
+      BiConsumer<Attribute,AttributeModifier> attributeConsumer = builder::put;
+      for (ModifierEntry entry : tool.getModifierList()) {
+        entry.getHook(ModifierHooks.ATTRIBUTES).addAttributes(tool, entry, slot, attributeConsumer);
+      }
+    }
+
+    return builder.build();
+  }
+
+  @Override
+  public Multimap<Attribute,AttributeModifier> getAttributeModifiers(ItemStack stack, EquipmentSlot slot) {
+    CompoundTag nbt = stack.getTag();
+    if (slot != getEquipmentSlot() || nbt == null) {
+      return ImmutableMultimap.of();
+    }
+    return getAttributeModifiers(ToolStack.from(stack), slot);
+  }
+
+
+  /* Elytra */
+
+  // TODO(fabric): Forge's IForgeItem#canElytraFly has no Fabric equivalent, starting a glide needs a mixin on the
+  //  elytra checks in LivingEntity
+  public boolean canElytraFly(ItemStack stack, LivingEntity entity) {
+    return type == Type.CHESTPLATE && !ToolDamageUtil.isBroken(stack) && ModifierUtil.checkVolatileFlag(stack, ELYTRA);
+  }
+
+  // TODO(fabric): Forge's IForgeItem#elytraFlightTick has no Fabric equivalent, ticking custom glide items needs a mixin
+  public boolean elytraFlightTick(ItemStack stack, LivingEntity entity, int flightTicks) {
+    if (type == Type.CHESTPLATE) {
+      ToolStack tool = ToolStack.from(stack);
+      if (!tool.isBroken() && tool.getVolatileData().getBoolean(ELYTRA)) {
+        // if any modifier says stop flying, stop flying
+        for (ModifierEntry entry : tool.getModifierList()) {
+          if (entry.getHook(ModifierHooks.ELYTRA_FLIGHT).elytraFlightTick(tool, entry, entity, flightTicks)) {
+            return false;
+          }
+        }
+        // damage the tool and keep flying
+        if (!entity.level().isClientSide && (flightTicks + 1) % 20 == 0) {
+          ToolDamageUtil.damageAnimated(tool, 1, entity, EquipmentSlot.CHEST);
+        }
+        return true;
+      }
+    }
+    return false;
+  }
+
+
+  /* Ticking */
+
+  @Override
+  public void inventoryTick(ItemStack stack, Level levelIn, Entity entityIn, int itemSlot, boolean isSelected) {
+    // don't care about non-living, they skip most tool context
+    if (entityIn instanceof LivingEntity living) {
+      ToolStack tool = ToolStack.from(stack);
+      if (!levelIn.isClientSide) {
+        tool.ensureHasData();
+      }
+      List<ModifierEntry> modifiers = tool.getModifierList();
+      if (!modifiers.isEmpty()) {
+        boolean isCorrectSlot = living.getItemBySlot(getEquipmentSlot()) == stack;
+        // we pass in the stack for most custom context, but for the sake of armor its easier to tell them that this is the correct slot for effects
+        for (ModifierEntry entry : modifiers) {
+          entry.getHook(ModifierHooks.INVENTORY_TICK).onInventoryTick(tool, entry, levelIn, living, itemSlot, isSelected, isCorrectSlot, stack);
+        }
+      }
+    }
+  }
+
+  @Override
+  public boolean overrideStackedOnOther(ItemStack held, Slot slot, ClickAction action, Player player) {
+    return SlotStackModifierHook.overrideStackedOnOther(held, slot, action, player) || super.overrideStackedOnOther(held, slot, action, player);
+  }
+
+  @Override
+  public boolean overrideOtherStackedOnMe(ItemStack slotStack, ItemStack held, Slot slot, ClickAction action, Player player, SlotAccess access) {
+    return SlotStackModifierHook.overrideOtherStackedOnMe(slotStack, held, slot, action, player, access) || super.overrideOtherStackedOnMe(slotStack, held, slot, action, player, access);
+  }
+
+
+  /* Tooltips */
+
+  @Override
+  public Component getName(ItemStack stack) {
+    return ToolNameHook.getName(getToolDefinition(), stack);
+  }
+
+  @Override
+  public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
+    TooltipUtil.addInformation(this, stack, level, tooltip, SafeClientAccess.getTooltipKey(), flag);
+  }
+
+  @Override
+  public List<Component> getStatInformation(IToolStackView tool, @Nullable Player player, List<Component> tooltips, TooltipKey key, TooltipFlag tooltipFlag) {
+    tooltips = TooltipUtil.getArmorStats(tool, player, tooltips, key, tooltipFlag);
+    TooltipUtil.addAttributes(this, tool, player, tooltips, TooltipUtil.SHOW_ARMOR_ATTRIBUTES, getEquipmentSlot());
+    return tooltips;
+  }
+
+  @Override
+  public int getDefaultTooltipHideFlags(ItemStack stack) {
+    return TooltipUtil.getModifierHideFlags(getToolDefinition());
+  }
+
+  /* Display items */
+
+  @Override
+  public ItemStack getRenderTool() {
+    if (toolForRendering == null) {
+      toolForRendering = ToolBuildHandler.buildToolForRendering(this, this.getToolDefinition());
+    }
+    return toolForRendering;
+  }
+}

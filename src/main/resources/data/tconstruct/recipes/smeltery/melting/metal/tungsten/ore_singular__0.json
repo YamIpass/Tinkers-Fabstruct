@@ -1,0 +1,20 @@
+{
+  "type": "tconstruct:ore_melting",
+  "byproducts": [
+    {
+      "amount": 180,
+      "rate": "metal",
+      "tag": "forge:molten_platinum"
+    }
+  ],
+  "ingredient": {
+    "tag": "forge:ores/tungsten"
+  },
+  "rate": "metal",
+  "result": {
+    "amount": 180,
+    "tag": "forge:molten_tungsten"
+  },
+  "temperature": 950,
+  "time": 162
+}

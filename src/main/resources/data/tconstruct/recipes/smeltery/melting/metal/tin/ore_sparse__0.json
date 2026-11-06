@@ -1,0 +1,28 @@
+{
+  "type": "tconstruct:ore_melting",
+  "byproducts": [
+    {
+      "amount": 90,
+      "rate": "metal",
+      "tag": "forge:molten_nickel"
+    }
+  ],
+  "ingredient": {
+    "fabric:type": "fabric:all",
+    "ingredients": [
+      {
+        "tag": "forge:ores/tin"
+      },
+      {
+        "tag": "forge:ore_rates/sparse"
+      }
+    ]
+  },
+  "rate": "metal",
+  "result": {
+    "amount": 90,
+    "tag": "forge:molten_tin"
+  },
+  "temperature": 225,
+  "time": 59
+}

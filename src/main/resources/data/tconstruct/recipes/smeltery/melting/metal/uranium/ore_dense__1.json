@@ -1,0 +1,28 @@
+{
+  "type": "tconstruct:ore_melting",
+  "byproducts": [
+    {
+      "amount": 540,
+      "rate": "metal",
+      "tag": "forge:molten_copper"
+    }
+  ],
+  "ingredient": {
+    "fabric:type": "fabric:all",
+    "ingredients": [
+      {
+        "tag": "forge:ores/uranium"
+      },
+      {
+        "tag": "forge:ore_rates/dense"
+      }
+    ]
+  },
+  "rate": "metal",
+  "result": {
+    "amount": 540,
+    "tag": "forge:molten_uranium"
+  },
+  "temperature": 830,
+  "time": 275
+}

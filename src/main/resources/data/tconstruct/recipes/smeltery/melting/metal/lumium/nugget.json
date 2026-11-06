@@ -1,0 +1,12 @@
+{
+  "type": "tconstruct:melting",
+  "ingredient": {
+    "tag": "forge:nuggets/lumium"
+  },
+  "result": {
+    "amount": 10,
+    "tag": "forge:molten_lumium"
+  },
+  "temperature": 1050,
+  "time": 23
+}

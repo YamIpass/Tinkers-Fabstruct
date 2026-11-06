@@ -1,0 +1,13 @@
+{
+  "type": "tconstruct:damagable_melting",
+  "ingredient": {
+    "tag": "forge:armors/leggings/electrum"
+  },
+  "result": {
+    "amount": 630,
+    "tag": "forge:molten_electrum",
+    "unit_size": 10
+  },
+  "temperature": 760,
+  "time": 156
+}

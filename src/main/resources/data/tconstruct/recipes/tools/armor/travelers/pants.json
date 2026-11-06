@@ -1,0 +1,60 @@
+{
+  "type": "tconstruct:crafting_shaped_materials",
+  "category": "equipment",
+  "key": {
+    "c": {
+      "fabric:type": "fabric:any",
+      "ingredients": [
+        {
+          "material": {
+            "type": "mantle:and",
+            "predicates": [
+              {
+                "type": "mantle:or",
+                "predicates": [
+                  "tconstruct:castable",
+                  "tconstruct:composite"
+                ]
+              },
+              {
+                "type": "tconstruct:stat_type",
+                "stat_type": "tconstruct:plating_leggings"
+              }
+            ]
+          },
+          "value": 1.0,
+          "fabric:type": "tconstruct:material_value"
+        },
+        {
+          "item": "tconstruct:fake_ingot",
+          "material": {
+            "type": "tconstruct:stat_type",
+            "stat_type": "tconstruct:plating_leggings"
+          },
+          "fabric:type": "tconstruct:material"
+        }
+      ]
+    },
+    "f": {
+      "item": "minecraft:flint"
+    },
+    "l": {
+      "material": {
+        "type": "tconstruct:stat_type",
+        "stat_type": "tconstruct:cuirass"
+      },
+      "value": 1.0,
+      "fabric:type": "tconstruct:material_value"
+    }
+  },
+  "parts": "cl",
+  "pattern": [
+    "lfl",
+    "c c",
+    "l l"
+  ],
+  "result": {
+    "item": "tconstruct:travelers_leggings"
+  },
+  "show_notification": true
+}

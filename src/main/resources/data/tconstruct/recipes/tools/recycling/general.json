@@ -1,0 +1,9 @@
+{
+  "type": "tconstruct:part_builder_tool_recycling",
+  "pattern": {
+    "item": "tconstruct:venom_bottle"
+  },
+  "tools": {
+    "tag": "tconstruct:modifiable/multipart"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "ingredient": {
+    "tag": "forge:nuggets/fiery"
+  },
+  "material": "tconstruct:fiery",
+  "needed": 9,
+  "value": 1,
+  "type": "tconstruct:material"
+}

@@ -1,0 +1,13 @@
+{
+  "type": "tconstruct:damagable_melting",
+  "ingredient": {
+    "tag": "forge:armors/helmets/electrum"
+  },
+  "result": {
+    "amount": 450,
+    "tag": "forge:molten_electrum",
+    "unit_size": 10
+  },
+  "temperature": 760,
+  "time": 132
+}

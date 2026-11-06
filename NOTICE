@@ -1,0 +1,44 @@
+Fabstruct — NOTICE
+==================
+
+This mod is an unofficial Fabric 1.20.1 port of Tinkers' Construct. It is not
+affiliated with, endorsed by, or supported by SlimeKnights.
+
+Port code and bundled content
+-----------------------------
+Tinkers' Construct (https://github.com/SlimeKnights/TinkersConstruct)
+  Copyright (c) SlimeKnights
+  License: MIT
+  The Java sources, data packs and assets in this jar are derived from the
+  Tinkers' Construct 1.20.1 build (3.12.1.231), adapted to the Fabric loader.
+  The original copyright notice and the MIT text are reproduced in LICENSE.
+
+Bundled libraries (shaded into META-INF/jars, unmodified)
+--------------------------------------------------------
+Mantle 1.20.1-1.11.DEV.eb1e9a5
+  Copyright (c) SlimeKnights, Fabric fork by Alpha-s-Stuff
+  https://github.com/Alpha-s-Stuff/Mantle
+  License: MIT
+
+Porting Lib 2.3.16-beta.81+1.20.1 (porting_lib_* modules)
+  Copyright (c) Fabricators of Create and contributors
+  https://github.com/Fabricators-of-Create/Porting-Lib
+  License: LGPL-3.0
+  The jars are bundled unmodified. Source code for every bundled module is
+  available at the repository above; rebuild it unchanged and replace the
+  jars in META-INF/jars to relink against a modified version.
+
+Star 1.5.2+1.20.1 — https://github.com/CrackedPolishedBlackstoneBricksMC/star — MIT
+Cardinal Components API 5.2.3 — https://github.com/Ladysnake/Cardinal-Components-API — MIT
+Dripstone Fluid Lib 3.0.1 — MIT
+Milk Lib 1.2.58 — https://github.com/ModdingPlus/Milk — MIT
+MixinSquared 0.1.1 — https://github.com/Bawnorton/MixinSquared — MIT
+Reach Entity Attributes 2.4.0 — https://github.com/JamiesWhiteShirt/reach-entity-attributes — MIT
+NightConfig core/toml 3.6.6 — https://github.com/TheElectronWill/night-config — LGPL-3.0
+jsr305 3.0.2 — https://github.com/findbugsproject/jsr305 — Apache-2.0
+
+Trademarks
+----------
+"Tinkers' Construct", "Mantle" and the SlimeKnights name are used only to
+describe the origin of this work. No trademark rights are granted by the MIT
+license, and no endorsement is implied.

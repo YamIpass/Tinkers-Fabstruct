@@ -1,0 +1,9 @@
+{
+  "ingredient": {
+    "item": "minecraft:obsidian"
+  },
+  "material": "tconstruct:obsidian",
+  "needed": 1,
+  "value": 4,
+  "type": "tconstruct:material"
+}

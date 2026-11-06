@@ -1,0 +1,14 @@
+{
+  "type": "tconstruct:modifier",
+  "allow_crystal": true,
+  "inputs": [
+    {
+      "tag": "forge:heads"
+    }
+  ],
+  "level": 1,
+  "result": "tconstruct:recapitated",
+  "tools": {
+    "tag": "tconstruct:modifiable/bonus_slots"
+  }
+}

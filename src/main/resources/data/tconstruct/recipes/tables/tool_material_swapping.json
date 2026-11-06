@@ -1,0 +1,6 @@
+{
+  "type": "tconstruct:tool_material_swapping",
+  "tools": {
+    "tag": "tconstruct:modifiable/multipart"
+  }
+}

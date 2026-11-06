@@ -1,0 +1,11 @@
+{
+  "ingredient": {
+    "fabric:type": "tconstruct:instrument",
+    "instrument": "minecraft:call_goat_horn",
+    "item": "minecraft:goat_horn"
+  },
+  "material": "tconstruct:horn#minecraft.call_goat_horn",
+  "needed": 1,
+  "value": 4,
+  "type": "tconstruct:material"
+}

@@ -1,0 +1,12 @@
+{
+  "type": "tconstruct:melting",
+  "ingredient": {
+    "tag": "forge:nuggets/brass"
+  },
+  "result": {
+    "amount": 10,
+    "tag": "forge:molten_brass"
+  },
+  "temperature": 605,
+  "time": 18
+}

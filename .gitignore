@@ -1,0 +1,30 @@
+# Gradle / Loom
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# dev runs (worlds, logs, crash reports)
+run/
+
+# local release scratch
+dist/
+.modrinth-token
+
+# logs and lint dumps
+*.log
+javac.*.args
+
+# python bytecode
+__pycache__/
+*.pyc
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db

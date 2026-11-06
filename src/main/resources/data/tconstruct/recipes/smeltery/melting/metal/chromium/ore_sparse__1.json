@@ -1,0 +1,28 @@
+{
+  "type": "tconstruct:ore_melting",
+  "byproducts": [
+    {
+      "amount": 90,
+      "rate": "metal",
+      "tag": "forge:molten_iron"
+    }
+  ],
+  "ingredient": {
+    "fabric:type": "fabric:all",
+    "ingredients": [
+      {
+        "tag": "forge:ores/chromium"
+      },
+      {
+        "tag": "forge:ore_rates/sparse"
+      }
+    ]
+  },
+  "rate": "metal",
+  "result": {
+    "amount": 90,
+    "tag": "forge:molten_chromium"
+  },
+  "temperature": 900,
+  "time": 95
+}

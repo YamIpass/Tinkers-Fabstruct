@@ -1,0 +1,10 @@
+{
+  "type": "tconstruct:material_fluid",
+  "fluid": {
+    "amount": 125,
+    "tag": "forge:creosote"
+  },
+  "input": "tconstruct:wood",
+  "output": "tconstruct:treated_wood",
+  "temperature": 600
+}

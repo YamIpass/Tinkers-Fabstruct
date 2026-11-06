@@ -1,0 +1,22 @@
+{
+  "type": "tconstruct:alloy",
+  "inputs": [
+    {
+      "amount": 270,
+      "tag": "forge:molten_tin"
+    },
+    {
+      "amount": 90,
+      "tag": "forge:molten_silver"
+    },
+    {
+      "amount": 500,
+      "tag": "forge:glowstone"
+    }
+  ],
+  "result": {
+    "amount": 360,
+    "tag": "forge:molten_lumium"
+  },
+  "temperature": 1050
+}

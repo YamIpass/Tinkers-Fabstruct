@@ -1,0 +1,65 @@
+package slimeknights.tconstruct.library.modifiers.fluid.entity;
+
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.Entity;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
+import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
+import slimeknights.mantle.data.loadable.primitive.IntLoadable;
+import slimeknights.mantle.data.loadable.record.RecordLoadable;
+import slimeknights.tconstruct.library.modifiers.fluid.EffectLevel;
+import slimeknights.tconstruct.library.modifiers.fluid.FluidEffect;
+import slimeknights.tconstruct.library.modifiers.fluid.FluidEffectContext;
+import slimeknights.tconstruct.library.modifiers.fluid.TimeAction;
+
+import java.util.Locale;
+
+/**
+ * Effect to set an entity freezing
+ * @param action  Determines whether to set or add time
+ * @param time    Time in ticks
+ */
+public record FreezeFluidEffect(TimeAction action, int time) implements FluidEffect<FluidEffectContext.Entity> {
+  public static final RecordLoadable<FreezeFluidEffect> LOADER = RecordLoadable.create(
+    TimeAction.LOADABLE.requiredField("action", e -> e.action),
+    IntLoadable.FROM_ONE.requiredField("time", e -> e.time),
+    FreezeFluidEffect::new);
+
+  @Override
+  public RecordLoadable<FreezeFluidEffect> getLoader() {
+    return LOADER;
+  }
+
+  @Override
+  public float apply(FluidStack fluid, EffectLevel level, FluidEffectContext.Entity context, TransactionContext transaction) {
+    Entity target = context.getTarget();
+    if (!target.canFreeze()) {
+      return 0;
+    }
+    if (this.action == TimeAction.ADD) {
+      float value = level.value();
+      if (transaction != null) {
+        // ensure we have enough time to freeze after applying this
+        target.setTicksFrozen(Math.max(target.getTicksRequiredToFreeze(), target.getTicksFrozen()) + Math.round(time * value));
+        target.clearFire();
+      }
+      return value;
+    } else {
+      int freezeTicks = target.getTicksRequiredToFreeze();
+      int frozen = target.getTicksFrozen();
+      float existing = frozen < freezeTicks ? 0 : (frozen - freezeTicks) / (float) time;
+      float effective = level.effective(existing);
+      if (transaction != null) {
+        target.setTicksFrozen(freezeTicks + Math.round(time * 2 * effective));
+        target.setRemainingFireTicks(0);
+      }
+      return effective - existing;
+    }
+  }
+
+  @Override
+  public Component getDescription(RegistryAccess registryAccess) {
+    String prefix = FluidEffect.getTranslationKey(getLoader()) + "." + action.name().toLowerCase(Locale.ROOT);
+    return Component.translatable(prefix, time / 20);
+  }
+}

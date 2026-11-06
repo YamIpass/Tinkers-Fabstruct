@@ -1,0 +1,9 @@
+{
+  "ingredient": {
+    "tag": "minecraft:planks"
+  },
+  "material": "tconstruct:wood",
+  "needed": 1,
+  "value": 1,
+  "type": "tconstruct:material"
+}

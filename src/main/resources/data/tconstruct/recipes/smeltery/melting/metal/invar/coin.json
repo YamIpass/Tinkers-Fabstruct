@@ -1,0 +1,12 @@
+{
+  "type": "tconstruct:melting",
+  "ingredient": {
+    "tag": "forge:coins/invar"
+  },
+  "result": {
+    "amount": 30,
+    "tag": "forge:molten_invar"
+  },
+  "temperature": 900,
+  "time": 42
+}

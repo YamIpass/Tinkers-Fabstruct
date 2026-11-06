@@ -1,0 +1,184 @@
+package slimeknights.tconstruct.shared;
+
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.BufferUploader;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import io.github.fabricators_of_create.porting_lib.event.common.RecipesUpdatedCallback;
+import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.shapes.BooleanOp;
+import net.minecraft.world.phys.shapes.Shapes;
+import org.joml.Matrix4f;
+import slimeknights.tconstruct.common.TinkerTags;
+import slimeknights.tconstruct.common.recipe.RecipeCacheInvalidator;
+import slimeknights.tconstruct.fluids.FluidClientEvents;
+import slimeknights.tconstruct.gadgets.GadgetClientEvents;
+import slimeknights.tconstruct.library.client.armor.texture.ArmorTextureSupplier;
+import slimeknights.tconstruct.library.client.armor.texture.DyedArmorTextureSupplier;
+import slimeknights.tconstruct.library.client.armor.texture.FirstArmorTextureSupplier;
+import slimeknights.tconstruct.library.client.armor.texture.FixedArmorTextureSupplier;
+import slimeknights.tconstruct.library.client.armor.texture.MaterialArmorTextureSupplier;
+import slimeknights.tconstruct.library.client.armor.texture.MaterialHasFallbackTextureSupplier;
+import slimeknights.tconstruct.library.client.armor.texture.TrimArmorTextureSupplier;
+import slimeknights.tconstruct.library.client.book.TinkerBook;
+import slimeknights.tconstruct.library.client.data.spritetransformer.FramesSpriteTransformer;
+import slimeknights.tconstruct.library.client.data.spritetransformer.GreyToColorMapping;
+import slimeknights.tconstruct.library.client.data.spritetransformer.IColorMapping;
+import slimeknights.tconstruct.library.client.data.spritetransformer.ISpriteTransformer;
+import slimeknights.tconstruct.library.client.data.spritetransformer.OffsettingSpriteTransformer;
+import slimeknights.tconstruct.library.client.data.spritetransformer.RecolorSpriteTransformer;
+import slimeknights.tconstruct.library.client.materials.MaterialRenderInfoLoader;
+import slimeknights.tconstruct.library.client.modifiers.DyedModifierModel;
+import slimeknights.tconstruct.library.client.modifiers.ModifierIconManager;
+import slimeknights.tconstruct.library.client.modifiers.NormalModifierModel;
+import slimeknights.tconstruct.library.client.modifiers.PotionModifierModel;
+import slimeknights.tconstruct.library.client.modifiers.model.BannerModifierModel;
+import slimeknights.tconstruct.library.client.modifiers.model.CompoundModifierModel;
+import slimeknights.tconstruct.library.client.modifiers.model.ConditionalModifierModel;
+import slimeknights.tconstruct.library.client.modifiers.model.FluidModifierModel;
+import slimeknights.tconstruct.library.client.modifiers.model.MaterialHasFallbackModifierModel;
+import slimeknights.tconstruct.library.client.modifiers.model.MaterialModifierModel;
+import slimeknights.tconstruct.library.client.modifiers.model.ModifierModel;
+import slimeknights.tconstruct.library.client.modifiers.model.NestedModifierModel;
+import slimeknights.tconstruct.library.client.modifiers.model.TankModifierModel;
+import slimeknights.tconstruct.library.client.modifiers.model.TrimModifierModel;
+import slimeknights.tconstruct.tables.TableClientEvents;
+import slimeknights.tconstruct.smeltery.SmelteryClientEvents;
+import slimeknights.tconstruct.world.WorldClientEvents;
+import slimeknights.tconstruct.tools.client.SlimeskullModifierModel;
+
+import static slimeknights.tconstruct.TConstruct.getResource;
+
+/**
+ * This class should only be referenced on the client side
+ */
+public class TinkerClient {
+  /**
+   * Called by TConstruct to handle any client side logic that needs to run during the constructor
+   */
+  public static void onConstruct() {
+    TinkerBook.initBook();
+    // needs to register listeners early enough for minecraft to load
+    // TODO(fabric): these loaders register against Fabric's client resource reload instead of Forge's model events
+    ResourceManagerHelper manager = ResourceManagerHelper.get(PackType.CLIENT_RESOURCES);
+    ModifierIconManager.init(manager);
+    MaterialRenderInfoLoader.init(manager);
+
+    // add the recipe cache invalidator to the client
+    // TODO(fabric): Forge's RecipesUpdatedEvent was replaced with PortingLib's RecipesUpdatedCallback
+    RecipesUpdatedCallback.EVENT.register(recipeManager -> RecipeCacheInvalidator.reload(true));
+
+    // register datagen serializers
+    ISpriteTransformer.SERIALIZER.registerDeserializer(RecolorSpriteTransformer.NAME, RecolorSpriteTransformer.DESERIALIZER);
+    // TODO(fabric): library/client/data/spritetransformer/GreyToSpriteTransformer does not exist in this port (its only
+    //  purpose was registering the datagen deserializer, which was dropped with datagen)
+    ISpriteTransformer.SERIALIZER.registerDeserializer(OffsettingSpriteTransformer.NAME, OffsettingSpriteTransformer.DESERIALIZER);
+    ISpriteTransformer.SERIALIZER.registerDeserializer(FramesSpriteTransformer.NAME, FramesSpriteTransformer.DESERIALIZER);
+    IColorMapping.SERIALIZER.registerDeserializer(GreyToColorMapping.NAME, GreyToColorMapping.DESERIALIZER);
+
+    // TODO(fabric): Forge ran these module client setup methods from the mod event bus; the Fabric port has no shared
+    //  client event initializer, so the client entrypoint reaches them through this class
+    GadgetClientEvents.init();
+    CommonsClientEvents.init();
+    TableClientEvents.init();
+    FluidClientEvents.clientSetup();
+    FluidClientEvents.registerModelLoaders();
+    SmelteryClientEvents.init();
+    WorldClientEvents.clientSetup();
+    // ToolClientEvents and the other tool client hooks are wired from FabricEvents.initClient()
+
+    // armor textures
+    ArmorTextureSupplier.LOADER.register(getResource("fixed"), FixedArmorTextureSupplier.LOADER);
+    ArmorTextureSupplier.LOADER.register(getResource("dyed"), DyedArmorTextureSupplier.LOADER);
+    ArmorTextureSupplier.LOADER.register(getResource("first_present"), FirstArmorTextureSupplier.LOADER);
+    ArmorTextureSupplier.LOADER.register(getResource("material"), MaterialArmorTextureSupplier.Material.LOADER);
+    ArmorTextureSupplier.LOADER.register(getResource("persistent_data"), MaterialArmorTextureSupplier.PersistentData.LOADER);
+    ArmorTextureSupplier.LOADER.register(getResource("trim"), TrimArmorTextureSupplier.LOADER);
+    ArmorTextureSupplier.LOADER.register(getResource("material_has_fallback"), MaterialHasFallbackTextureSupplier.LOADER);
+
+    // modifier models
+    ModifierModel.LOADER.register(getResource("empty"), ModifierModel.EMPTY.getLoader());
+    ModifierModel.LOADER.register(getResource("compound"), CompoundModifierModel.LOADER);
+    ModifierModel.LOADER.register(getResource("conditional"), ConditionalModifierModel.LOADER);
+    ModifierModel.LOADER.register(getResource("trait"), NestedModifierModel.Trait.LOADER);
+    ModifierModel.LOADER.register(getResource("crafted"), NestedModifierModel.Crafted.LOADER);
+    ModifierModel.LOADER.register(getResource("basic"), NormalModifierModel.LOADER);
+    ModifierModel.LOADER.register(getResource("dyed"), DyedModifierModel.LOADER);
+    ModifierModel.LOADER.register(getResource("material_index"), MaterialModifierModel.Index.LOADER);
+    ModifierModel.LOADER.register(getResource("persistent_material"), MaterialModifierModel.PersistentData.LOADER);
+    ModifierModel.LOADER.register(getResource("dyed_material"), MaterialModifierModel.Dyed.LOADER);
+    ModifierModel.LOADER.register(getResource("potion"), PotionModifierModel.LOADER);
+    ModifierModel.LOADER.register(getResource("armor_trim"), TrimModifierModel.Armor.LOADER);
+    ModifierModel.LOADER.register(getResource("custom_trim"), TrimModifierModel.Custom.LOADER);
+    ModifierModel.LOADER.register(getResource("banner"), BannerModifierModel.LOADER);
+    ModifierModel.LOADER.register(getResource("fluid"), FluidModifierModel.LOADER);
+    ModifierModel.LOADER.register(getResource("tank"), TankModifierModel.LOADER);
+    ModifierModel.LOADER.register(getResource("material_has_fallback"), MaterialHasFallbackModifierModel.LOADER);
+    // specialized
+    ModifierModel.LOADER.register(getResource("slimeskull"), SlimeskullModifierModel.LOADER);
+  }
+
+  /**
+   * Renders the block overlay for transparent blocks.
+   * <p>
+   * TODO(fabric): Forge's {@code RenderBlockScreenEffectEvent} has no Fabric equivalent; this method must be called from a
+   *  mixin into {@code ScreenEffectRenderer} (e.g. {@code renderScreenEffect}/{@code renderFire}), with the returned value
+   *  telling the caller to cancel the vanilla overlay.
+   */
+  public static boolean renderBlockOverlay(PoseStack poseStack, BlockState state, BlockPos pos) {
+    if (state.is(TinkerTags.Blocks.TRANSPARENT_OVERLAY)) {
+      Minecraft minecraft = Minecraft.getInstance();
+      assert minecraft.level != null;
+      assert minecraft.player != null;
+      float width = minecraft.player.getBbWidth() * 0.8F;
+      // check collision of the block again, for non-full blocks
+      if (Shapes.joinIsNotEmpty(state.getShape(minecraft.level, pos).move(pos.getX(), pos.getY(), pos.getZ()), Shapes.create(AABB.ofSize(minecraft.player.getEyePosition(), width, 1.0E-6D, width)), BooleanOp.AND)) {
+        // this is for the most part a clone of the vanilla logic from ScreenEffectRenderer with some changes mentioned below
+
+        TextureAtlasSprite texture = minecraft.getBlockRenderer().getBlockModelShaper().getParticleIcon(state);
+        RenderSystem.setShaderTexture(0, texture.atlasLocation());
+        // changed: shader using pos tex
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
+
+        // change: handle brightness based on renderWater, and enable blend
+        Player player = minecraft.player;
+        BlockPos blockpos = BlockPos.containing(player.getX(), player.getEyeY(), player.getZ());
+        float brightness = LightTexture.getBrightness(player.level().dimensionType(), player.level().getMaxLocalRawBrightness(blockpos));
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        RenderSystem.setShaderColor(brightness, brightness, brightness, 1.0f);
+
+        // draw the quad
+        float u0 = texture.getU0();
+        float u1 = texture.getU1();
+        float v0 = texture.getV0();
+        float v1 = texture.getV1();
+        Matrix4f matrix4f = poseStack.last().pose();
+        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        // change: dropped color, see above
+        bufferbuilder.vertex(matrix4f, -1, -1, -0.5f).uv(u1, v1).endVertex();
+        bufferbuilder.vertex(matrix4f, 1, -1, -0.5f).uv(u0, v1).endVertex();
+        bufferbuilder.vertex(matrix4f, 1, 1, -0.5f).uv(u0, v0).endVertex();
+        bufferbuilder.vertex(matrix4f, -1, 1, -0.5f).uv(u1, v0).endVertex();
+        BufferUploader.drawWithShader(bufferbuilder.end());
+        // changed: disable blending
+        RenderSystem.disableBlend();
+      }
+      return true;
+    }
+    return false;
+  }
+}

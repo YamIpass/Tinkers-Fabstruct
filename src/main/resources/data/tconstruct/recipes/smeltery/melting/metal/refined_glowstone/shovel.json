@@ -1,0 +1,13 @@
+{
+  "type": "tconstruct:damagable_melting",
+  "ingredient": {
+    "tag": "forge:tools/shovels/refined_glowstone"
+  },
+  "result": {
+    "amount": 90,
+    "tag": "forge:molten_refined_glowstone",
+    "unit_size": 10
+  },
+  "temperature": 825,
+  "time": 61
+}

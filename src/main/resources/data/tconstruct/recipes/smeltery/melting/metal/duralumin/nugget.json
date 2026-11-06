@@ -1,0 +1,12 @@
+{
+  "type": "tconstruct:melting",
+  "ingredient": {
+    "tag": "forge:nuggets/duralumin"
+  },
+  "result": {
+    "amount": 10,
+    "tag": "forge:molten_duralumin"
+  },
+  "temperature": 625,
+  "time": 18
+}

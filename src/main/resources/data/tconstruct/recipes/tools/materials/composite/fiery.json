@@ -1,0 +1,10 @@
+{
+  "type": "tconstruct:material_fluid",
+  "fluid": {
+    "amount": 250,
+    "tag": "tconstruct:fiery_liquid"
+  },
+  "input": "tconstruct:iron",
+  "output": "tconstruct:fiery",
+  "temperature": 1500
+}

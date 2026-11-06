@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "count": 1,
+  "ingredient": {
+    "tag": "tconstruct:scorched_blocks"
+  },
+  "result": "tconstruct:chiseled_scorched_bricks"
+}

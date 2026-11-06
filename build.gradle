@@ -1,0 +1,135 @@
+plugins {
+    id 'fabric-loom' version '1.8.13'
+    id 'maven-publish'
+}
+
+version = project.mod_version
+group = project.maven_group
+
+base {
+    // published file name carries the Minecraft version, e.g. Tinkers-Fabstruct-1.20.1-0.1.0.jar
+    archivesName = "${project.archives_base_name}-${project.minecraft_version}"
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    // Official Mojang mappings, not yarn: upstream Tinkers' Construct sources are decompiled with Mojang
+    // names (getWorld/getLevel/BlockPathTypes/...), so every yarn rename would be a manual edit. The
+    // Fabric port we vendor (Hephaestus) builds against official mappings too, and mappings never affect
+    // the runtime (loom remaps to intermediary on export).
+    mappings loom.officialMojangMappings()
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+
+    // Fabric port of Mantle (MIT, Alpha-s-Stuff/Mantle) and the libraries it needs, vendored from the
+    // Hephaestus jar so upstream Tinkers' Construct sources can be copied over nearly verbatim.
+    // Loom cannot nest file dependencies for us, so jar with the META-INF/jars block below.
+    modImplementation fileTree(dir: 'libs', include: '*.jar')
+
+    // Upstream Tinkers' Construct code is copied over nearly verbatim, which means Lombok annotations and
+    // javax.annotation nullability markers come along with it.
+    compileOnly 'org.projectlombok:lombok:1.18.34'
+    annotationProcessor 'org.projectlombok:lombok:1.18.34'
+    compileOnly 'com.google.code.findbugs:jsr305:3.0.2'
+    // upstream code is annotated with error prone's @CanIgnoreReturnValue / @CheckReturnValue
+    compileOnly 'com.google.errorprone:error_prone_annotations:2.23.0'
+
+    testImplementation platform('org.junit:junit-bom:5.10.2')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+processResources {
+    inputs.property 'version', project.version
+    inputs.property 'mod_name', project.mod_name
+
+    filesMatching('fabric.mod.json') {
+        expand 'version': project.version, 'mod_name': project.mod_name
+    }
+}
+
+// The self test builds every tool at server start; pass -Pselftest to run it and stop the server.
+loom {
+    // Upstream Tinkers' Construct reaches into several private vanilla members (trident stack, arrow life,
+    // block breaking progress, ...). The Fabric port we use as reference ships this mapping list, and the
+    // entries are Mojang named so they apply directly to our official-mappings build.
+    accessWidenerPath = file("src/main/resources/tconstruct.accesswidener")
+    // The legacy Mixin annotation processor (sponge-mixin) silently disables Lombok's annotation processing on
+    // JDK 21, which drops every @Getter/@RequiredArgsConstructor member. Loom generates mixin refmaps itself.
+    mixin {
+        useLegacyMixinAp = false
+    }
+    runs {
+        server {
+            property 'tconstruct.selftest', project.findProperty('selftest') ?: 'false'
+            // stop the server once the self test finished, so `gradlew runServer -Pselftest` scores itself
+            property 'tconstruct.selftest.stop', project.findProperty('selftest') ?: 'false'
+        }
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.release = 17
+    it.options.encoding = 'UTF-8'
+    // the port is large and javac caps at 100 errors by default, which hides the real backlog
+    it.options.compilerArgs += ['-Xmaxerrs', '100000']
+    // JDK 21 requires an explicit -proc flag for annotation processing to run at all
+    it.options.compilerArgs += ['-proc:full']
+    // Loom leaves the legacy mixin processor on the annotation processor path even with
+    // useLegacyMixinAp = false, and sponge-mixin makes javac silently skip Lombok.  Pin the path to
+    // the lombok dependency so @Getter/@Data keep working.
+    it.options.annotationProcessorPath = configurations.annotationProcessor
+    it.doFirst {
+        println 'EXEC-ALL-ARGS: ' + options.allCompilerArgs.findAll { it.startsWith('-proc') || it == '-processor' }
+    }
+}
+
+java {
+    withSourcesJar()
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+test {
+    useJUnitPlatform()
+}
+
+jar {
+    // MIT text for the ported code plus the attribution of every bundled library
+    from('LICENSE') {
+        into 'META-INF'
+    }
+    from('NOTICE') {
+        into 'META-INF'
+    }
+    // jar in jar: the Fabric Mantle port and the libraries it needs ship inside this jar, which is
+    // the layout Fabric's loader already understands
+    from(fileTree('libs')) {
+        into 'META-INF/jars'
+    }
+}
+
+// temporary diagnostic: print the javac options actually used for compileJava
+tasks.register('printJavacOptions') {
+    doLast {
+        def c = tasks.named('compileJava').get()
+        println 'ARGS: ' + c.options.compilerArgs
+        println 'APPATH: ' + c.options.annotationProcessorPath?.files?.collect { it.name }
+        println 'PROCESSORS: ' + c.options.compilerArgs.findAll { it.startsWith('-proc') }
+        println 'RELEASE: ' + c.options.release
+    }
+}
+
+// temporary helper: dump the compile classpath so external tools (delombok) can run
+tasks.register('printSourceClasspath') {
+    doLast {
+        def cp = sourceSets.main.compileClasspath.files.collect { it.absolutePath }.join(File.pathSeparator)
+        new File('build', 'compile_classpath.txt').text = cp
+        println "classpath entries: ${sourceSets.main.compileClasspath.files.size()}"
+    }
+}
+

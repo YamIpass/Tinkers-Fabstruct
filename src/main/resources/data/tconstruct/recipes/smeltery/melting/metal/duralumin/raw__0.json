@@ -1,0 +1,20 @@
+{
+  "type": "tconstruct:ore_melting",
+  "byproducts": [
+    {
+      "amount": 90,
+      "rate": "metal",
+      "tag": "forge:molten_aluminum"
+    }
+  ],
+  "ingredient": {
+    "tag": "forge:raw_materials/duralumin"
+  },
+  "rate": "metal",
+  "result": {
+    "amount": 90,
+    "tag": "forge:molten_duralumin"
+  },
+  "temperature": 625,
+  "time": 82
+}

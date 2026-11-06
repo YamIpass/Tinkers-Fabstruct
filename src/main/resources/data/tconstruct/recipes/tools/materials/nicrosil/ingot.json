@@ -1,0 +1,9 @@
+{
+  "ingredient": {
+    "tag": "forge:ingots/nicrosil"
+  },
+  "material": "tconstruct:nicrosil",
+  "needed": 1,
+  "value": 1,
+  "type": "tconstruct:material"
+}

@@ -1,0 +1,12 @@
+{
+  "type": "tconstruct:melting",
+  "ingredient": {
+    "tag": "forge:wires/aluminum"
+  },
+  "result": {
+    "amount": 45,
+    "tag": "forge:molten_aluminum"
+  },
+  "temperature": 425,
+  "time": 9
+}

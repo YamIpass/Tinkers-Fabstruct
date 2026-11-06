@@ -1,0 +1,9 @@
+{
+  "type": "tconstruct:material_fluid",
+  "fluid": {
+    "amount": 90,
+    "tag": "forge:molten_nicrosil"
+  },
+  "output": "tconstruct:nicrosil",
+  "temperature": 1100
+}

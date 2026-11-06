@@ -1,0 +1,9 @@
+{
+  "type": "tconstruct:material_melting",
+  "input": "tconstruct:necronium",
+  "result": {
+    "amount": 90,
+    "tag": "forge:molten_uranium"
+  },
+  "temperature": 830
+}

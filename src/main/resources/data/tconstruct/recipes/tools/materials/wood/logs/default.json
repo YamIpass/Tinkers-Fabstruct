@@ -1,0 +1,13 @@
+{
+  "ingredient": {
+    "tag": "minecraft:logs"
+  },
+  "leftover": {
+    "count": 2,
+    "item": "minecraft:stick"
+  },
+  "material": "tconstruct:wood",
+  "needed": 1,
+  "value": 4,
+  "type": "tconstruct:material"
+}

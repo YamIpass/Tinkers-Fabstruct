@@ -1,0 +1,12 @@
+{
+  "type": "tconstruct:melting",
+  "ingredient": {
+    "tag": "forge:dusts/lumium"
+  },
+  "result": {
+    "amount": 90,
+    "tag": "forge:molten_lumium"
+  },
+  "temperature": 1050,
+  "time": 51
+}

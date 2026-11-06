@@ -1,0 +1,12 @@
+{
+  "type": "tconstruct:melting",
+  "ingredient": {
+    "tag": "forge:gears/netherite"
+  },
+  "result": {
+    "amount": 360,
+    "tag": "forge:molten_netherite"
+  },
+  "temperature": 1250,
+  "time": 147
+}

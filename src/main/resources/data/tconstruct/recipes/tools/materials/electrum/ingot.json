@@ -1,0 +1,9 @@
+{
+  "ingredient": {
+    "tag": "forge:ingots/electrum"
+  },
+  "material": "tconstruct:electrum",
+  "needed": 1,
+  "value": 1,
+  "type": "tconstruct:material"
+}

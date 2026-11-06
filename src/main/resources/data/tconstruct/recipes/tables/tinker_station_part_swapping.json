@@ -1,0 +1,7 @@
+{
+  "type": "tconstruct:tinker_station_part_swapping",
+  "max_stack_size": 16,
+  "tools": {
+    "tag": "tconstruct:modifiable/multipart"
+  }
+}

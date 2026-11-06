@@ -1,0 +1,438 @@
+package slimeknights.tconstruct.library.tools.item.ranged;
+
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Multimap;
+import lombok.Getter;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.EquipmentSlot.Type;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.SlotAccess;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.ClickAction;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ProjectileWeaponItem;
+import net.minecraft.world.item.Rarity;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
+import io.github.fabricators_of_create.porting_lib.enchant.CustomEnchantingBehaviorItem;
+import io.github.fabricators_of_create.porting_lib.item.CustomEnchantmentLevelItem;
+import io.github.fabricators_of_create.porting_lib.item.CustomEnchantmentsItem;
+import io.github.fabricators_of_create.porting_lib.item.CustomMaxCountItem;
+import io.github.fabricators_of_create.porting_lib.item.DamageableItem;
+import io.github.fabricators_of_create.porting_lib.item.ReequipAnimationItem;
+import io.github.fabricators_of_create.porting_lib.item.ShieldBlockItem;
+import io.github.fabricators_of_create.porting_lib.tool.ToolAction;
+import io.github.fabricators_of_create.porting_lib.tool.addons.ToolActionItem;
+import io.github.fabricators_of_create.porting_lib.transfer.item.ItemItemStorages;
+import slimeknights.mantle.client.SafeClientAccess;
+import slimeknights.tconstruct.TConstruct;
+import slimeknights.tconstruct.library.client.item.ModifiableItemClientExtension;
+import slimeknights.tconstruct.library.modifiers.ModifierEntry;
+import slimeknights.tconstruct.library.modifiers.ModifierHooks;
+import slimeknights.tconstruct.library.modifiers.hook.behavior.AttributesModifierHook;
+import slimeknights.tconstruct.library.modifiers.hook.behavior.EnchantmentModifierHook;
+import slimeknights.tconstruct.library.modifiers.hook.display.DurabilityDisplayModifierHook;
+import slimeknights.tconstruct.library.modifiers.hook.interaction.EntityInteractionModifierHook;
+import slimeknights.tconstruct.library.modifiers.hook.interaction.InventoryTickModifierHook;
+import slimeknights.tconstruct.library.modifiers.hook.interaction.SlotStackModifierHook;
+import slimeknights.tconstruct.library.modifiers.hook.interaction.UsingToolModifierHook;
+import slimeknights.tconstruct.library.modifiers.modules.build.RarityModule;
+import slimeknights.tconstruct.library.tools.IndestructibleItemEntity;
+import slimeknights.tconstruct.library.tools.capability.ToolCapabilityProvider;
+import slimeknights.tconstruct.library.tools.capability.fluid.ToolFluidCapability;
+import slimeknights.tconstruct.library.tools.capability.inventory.ToolInventoryCapability;
+import slimeknights.tconstruct.library.tools.definition.ToolDefinition;
+import slimeknights.tconstruct.library.tools.definition.module.display.ToolNameHook;
+import slimeknights.tconstruct.library.tools.definition.module.mining.IsEffectiveToolHook;
+import slimeknights.tconstruct.library.tools.definition.module.mining.MiningSpeedToolHook;
+import slimeknights.tconstruct.library.tools.helper.ModifierUtil;
+import slimeknights.tconstruct.library.tools.helper.ToolBuildHandler;
+import slimeknights.tconstruct.library.tools.helper.ToolDamageUtil;
+import slimeknights.tconstruct.library.tools.helper.ToolHarvestLogic;
+import slimeknights.tconstruct.library.tools.helper.TooltipUtil;
+import slimeknights.tconstruct.library.tools.item.IModifiableDisplay;
+import slimeknights.tconstruct.library.tools.item.ModifiableItem;
+import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
+import slimeknights.tconstruct.library.tools.nbt.ModDataNBT;
+import slimeknights.tconstruct.library.tools.nbt.ToolStack;
+import slimeknights.tconstruct.tools.TinkerToolActions;
+
+import javax.annotation.Nullable;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
+
+import static slimeknights.tconstruct.library.modifiers.hook.interaction.GeneralInteractionModifierHook.KEY_DRAWTIME;
+
+/** Base class for any items that launch projectiles */
+public abstract class ModifiableLauncherItem extends ProjectileWeaponItem implements IModifiableDisplay, ToolActionItem, CustomEnchantingBehaviorItem,
+                                                       CustomEnchantmentLevelItem, CustomEnchantmentsItem, CustomMaxCountItem, DamageableItem,
+                                                       ReequipAnimationItem, ShieldBlockItem {
+  /** Persistent data key for the ammo being used on drawing back the bow. */
+  public static final ResourceLocation KEY_DRAWBACK_AMMO = TConstruct.getResource("drawback_ammo");
+
+  /** Tool definition for the given tool */
+  @Getter
+  private final ToolDefinition toolDefinition;
+
+  /** Cached tool for rendering on UIs */
+  private ItemStack toolForRendering;
+
+  public ModifiableLauncherItem(Properties properties, ToolDefinition toolDefinition) {
+    super(properties);
+    this.toolDefinition = toolDefinition;
+    // TODO(fabric): Forge capabilities are replaced by Fabric item lookups, registered directly on the item
+    FluidStorage.ITEM.registerForItems((itemStack, context) -> new ToolFluidCapability(itemStack, () -> ToolStack.from(itemStack)), this);
+    ItemItemStorages.ITEM.registerForItems((itemStack, context) -> ToolInventoryCapability.getCap(context, itemStack), this);
+  }
+
+
+  /* Basic properties */
+
+  @Override
+  public int getItemStackLimit(ItemStack stack) {
+    return 1;
+  }
+
+  // TODO(fabric): Forge's IForgeItem#isNotReplaceableByPickAction has no Fabric equivalent, kept as a plain helper
+  public boolean isNotReplaceableByPickAction(ItemStack stack, Player player, int inventorySlot) {
+    return true;
+  }
+
+
+  /* Enchanting */
+
+  @Override
+  public boolean isEnchantable(ItemStack stack) {
+    return false;
+  }
+
+  @Override
+  public boolean isBookEnchantable(ItemStack stack, ItemStack book) {
+    return false;
+  }
+
+  @Override
+  public boolean canApplyAtEnchantingTable(ItemStack stack, Enchantment enchantment) {
+    return enchantment.isCurse() && CustomEnchantingBehaviorItem.super.canApplyAtEnchantingTable(stack, enchantment);
+  }
+
+  @Override
+  public int getEnchantmentValue() {
+    return 0;
+  }
+
+  // TODO(fabric): Forge's Item#getEnchantmentLevel hook is gone, Porting Lib patches EnchantmentHelper instead; the
+  //  incoming level is ignored as tinkers launchers compute their level from modifiers
+  @Override
+  public int modifyEnchantmentLevel(ItemStack stack, Enchantment enchantment, int level) {
+    return EnchantmentModifierHook.getEnchantmentLevel(stack, enchantment);
+  }
+
+  @Override
+  public void modifyEnchantments(Map<Enchantment,Integer> enchantments, ItemStack stack) {
+    EnchantmentModifierHook.getAllEnchantments(stack, enchantments);
+  }
+
+
+  /* Loading */
+
+  // TODO(fabric): Forge's initCapabilities has no Fabric equivalent, the item lookups are registered in the constructor
+
+  @Override
+  public void verifyTagAfterLoad(CompoundTag nbt) {
+    ToolStack.verifyTag(this, nbt, getToolDefinition());
+  }
+
+  @Override
+  public void onCraftedBy(ItemStack stack, Level worldIn, Player playerIn) {
+    ToolStack.ensureInitialized(stack, getToolDefinition());
+  }
+
+
+  /* Display */
+
+  @Override
+  public boolean isFoil(ItemStack stack) {
+    // we use enchantments to handle some modifiers, so don't glow from them
+    // however, if a modifier wants to glow let them
+    return ModifierUtil.checkVolatileFlag(stack, SHINY);
+  }
+
+  @Override
+  public Rarity getRarity(ItemStack stack) {
+    return RarityModule.getRarity(stack);
+  }
+
+
+  /* Item entity */
+
+  @Override
+  public boolean hasCustomEntity(ItemStack stack) {
+    return IndestructibleItemEntity.hasCustomEntity(stack);
+  }
+
+  @Nullable
+  @Override
+  public Entity createEntity(Level world, Entity original, ItemStack stack) {
+    return IndestructibleItemEntity.createFrom(world, original, stack);
+  }
+
+  @Deprecated
+  @Override
+  public void onDestroyed(ItemEntity entity) {
+    ToolInventoryCapability.onDestroyed(entity);
+  }
+
+
+  /* Damage/Durability */
+
+  // TODO(fabric): Forge's Item#isRepairable hook has no Fabric equivalent (Porting Lib's RepairableItem was removed in
+  //  2.3.16), tinkers launchers are fixed in the tinker station instead
+  public boolean isRepairable(ItemStack stack) {
+    // handle in the tinker station
+    return false;
+  }
+
+  @Override
+  public boolean canBeDepleted() {
+    return true;
+  }
+
+  @Override
+  public int getMaxDamage(ItemStack stack) {
+    return ToolDamageUtil.getFakeMaxDamage(stack);
+  }
+
+  @Override
+  public int getDamage(ItemStack stack) {
+    if (!canBeDepleted()) {
+      return 0;
+    }
+    return ToolStack.from(stack).getDamage();
+  }
+
+  @Override
+  public void setDamage(ItemStack stack, int damage) {
+    if (canBeDepleted()) {
+      ToolStack.from(stack).setDamage(damage);
+    }
+  }
+
+  // TODO(fabric): Fabric's ItemStack#hurtAndBreak never calls this, so it is only a plain helper; launcher damage paths
+  //  go through ToolDamageUtil, restoring the vanilla hook would need a mixin on ItemStack#hurtAndBreak
+  public <T extends LivingEntity> int damageItem(ItemStack stack, int amount, T damager, Consumer<T> onBroken) {
+    ToolDamageUtil.handleDamageItem(stack, amount, damager, onBroken);
+    return 0;
+  }
+
+
+  /* Durability display */
+
+  @Override
+  public boolean isBarVisible(ItemStack pStack) {
+    return DurabilityDisplayModifierHook.showDurabilityBar(pStack);
+  }
+
+  @Override
+  public int getBarColor(ItemStack pStack) {
+    return DurabilityDisplayModifierHook.getDurabilityRGB(pStack);
+  }
+
+  @Override
+  public int getBarWidth(ItemStack pStack) {
+    return DurabilityDisplayModifierHook.getDurabilityWidth(pStack);
+  }
+
+
+  /* Modifier interactions */
+
+  @Override
+  public void inventoryTick(ItemStack stack, Level worldIn, Entity entityIn, int itemSlot, boolean isSelected) {
+    InventoryTickModifierHook.heldInventoryTick(stack, worldIn, entityIn, itemSlot, isSelected);
+  }
+
+  @Override
+  public boolean overrideStackedOnOther(ItemStack held, Slot slot, ClickAction action, Player player) {
+    return SlotStackModifierHook.overrideStackedOnOther(held, slot, action, player);
+  }
+
+  @Override
+  public boolean overrideOtherStackedOnMe(ItemStack slotStack, ItemStack held, Slot slot, ClickAction action, Player player, SlotAccess access) {
+    return SlotStackModifierHook.overrideOtherStackedOnMe(slotStack, held, slot, action, player, access);
+  }
+
+
+  /* Attacking */
+
+  @Override
+  public boolean onLeftClickEntity(ItemStack stack, Player player, Entity target) {
+    return EntityInteractionModifierHook.leftClickEntity(stack, player, target);
+  }
+
+  @Override
+  public boolean canPerformAction(ItemStack stack, ToolAction toolAction) {
+    return ModifierUtil.canPerformAction(ToolStack.from(stack), toolAction);
+  }
+
+  @Override
+  public Multimap<Attribute,AttributeModifier> getAttributeModifiers(IToolStackView tool, EquipmentSlot slot) {
+    return AttributesModifierHook.getHeldAttributeModifiers(tool, slot);
+  }
+
+  @Override
+  public Multimap<Attribute, AttributeModifier> getAttributeModifiers(ItemStack stack, EquipmentSlot slot) {
+    CompoundTag nbt = stack.getTag();
+    if (nbt == null || slot.getType() != Type.HAND) {
+      return ImmutableMultimap.of();
+    }
+    return getAttributeModifiers(ToolStack.from(stack), slot);
+  }
+
+  @Override
+  public boolean canDisableShield(ItemStack stack, ItemStack shield, LivingEntity entity, LivingEntity attacker) {
+    return canPerformAction(stack, TinkerToolActions.SHIELD_DISABLE);
+  }
+
+
+  /* Arrow logic */
+
+  @Override
+  public int getUseDuration(ItemStack pStack) {
+    return 72000;
+  }
+
+  @Override
+  public abstract UseAnim getUseAnimation(ItemStack pStack);
+
+  @Override
+  public ItemStack finishUsingItem(ItemStack stack, Level pLevel, LivingEntity living) {
+    ToolStack tool = ToolStack.from(stack);
+    int duration = getUseDuration(stack);
+    for (ModifierEntry entry : tool.getModifiers()) {
+      entry.getHook(ModifierHooks.TOOL_USING).beforeReleaseUsing(tool, entry, living, duration, 0, ModifierEntry.EMPTY);
+    }
+    return stack;
+  }
+
+  // TODO(fabric): Forge calls this from LivingEntity#stopUsingItem, Fabric has no equivalent hook; clearing the draw
+  //  data on scroll-away needs a mixin
+  public void onStopUsing(ItemStack stack, LivingEntity entity, int timeLeft) {
+    onStopUsing(ToolStack.from(stack), entity, timeLeft);
+  }
+
+  /** Same as {@link #onStopUsing(ItemStack, LivingEntity, int)} but uses a tool. */
+  protected void onStopUsing(IToolStackView tool, LivingEntity entity, int timeLeft) {
+    UsingToolModifierHook.afterStopUsing(tool, entity, timeLeft);
+    ModDataNBT data = tool.getPersistentData();
+    data.remove(KEY_DRAWTIME);
+    data.remove(KEY_DRAWBACK_AMMO);
+  }
+
+  @Override
+  public void onUseTick(Level level, LivingEntity living, ItemStack bow, int chargeRemaining) {
+    // play the sound at the end of loading as an indicator its loaded, texture is another indicator
+    int duration = getUseDuration(bow);
+    if (!level.isClientSide) {
+      if (duration - chargeRemaining == ModifierUtil.getPersistentInt(bow, KEY_DRAWTIME, -1)) {
+        level.playSound(null, living.getX(), living.getY(), living.getZ(), SoundEvents.CROSSBOW_LOADING_MIDDLE, SoundSource.PLAYERS, 0.75F, 1.0F);
+      }
+    }
+    ToolStack tool = ToolStack.from(bow);
+    for (ModifierEntry entry : tool.getModifiers()) {
+      entry.getHook(ModifierHooks.TOOL_USING).onUsingTick(tool, entry, living, duration, chargeRemaining, ModifierEntry.EMPTY);
+    }
+  }
+
+
+  /* Tooltips */
+
+  @Override
+  public Component getName(ItemStack stack) {
+    return ToolNameHook.getName(getToolDefinition(), stack);
+  }
+
+  @Override
+  public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
+    TooltipUtil.addInformation(this, stack, level, tooltip, SafeClientAccess.getTooltipKey(), flag);
+  }
+
+  @Override
+  public int getDefaultTooltipHideFlags(ItemStack stack) {
+    return TooltipUtil.getModifierHideFlags(getToolDefinition());
+  }
+
+
+  /* Display */
+
+  @Override
+  public ItemStack getRenderTool() {
+    if (toolForRendering == null) {
+      toolForRendering = ToolBuildHandler.buildToolForRendering(this, this.getToolDefinition());
+    }
+    return toolForRendering;
+  }
+
+  // TODO(fabric): Forge's initializeClient(IClientItemExtensions) has no Fabric equivalent,
+  //  client item extensions are registered by the client initializer in the Fabric port
+
+
+  /* Misc */
+
+  // TODO(fabric): Forge's IForgeItem#shouldCauseBlockBreakReset has no Fabric equivalent (FabricItem only offers
+  //  allowContinuingBlockBreaking)
+  public boolean shouldCauseBlockBreakReset(ItemStack oldStack, ItemStack newStack) {
+    return shouldCauseReequipAnimation(oldStack, newStack, false);
+  }
+
+  @Override
+  public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
+    return ModifiableItem.shouldCauseReequip(oldStack, newStack, slotChanged);
+  }
+
+
+  /* Harvest logic, mostly used by modifiers but technically would let you make a pickaxe bow */
+
+  @Override
+  public boolean isSuitableFor(ItemStack stack, BlockState state) {
+    return IsEffectiveToolHook.isEffective(ToolStack.from(stack), state);
+  }
+
+  @Override
+  public boolean mineBlock(ItemStack stack, Level worldIn, BlockState state, BlockPos pos, LivingEntity entityLiving) {
+    return ToolHarvestLogic.mineBlock(stack, worldIn, state, pos, entityLiving);
+  }
+
+  @Override
+  public float getDestroySpeed(ItemStack stack, BlockState state) {
+    return MiningSpeedToolHook.getDestroySpeed(stack, state);
+  }
+
+  @Override
+  public boolean onBlockStartBreak(ItemStack stack, BlockPos pos, Player player) {
+    return ToolHarvestLogic.handleBlockBreak(stack, pos, player);
+  }
+
+
+  /* Multishot helper */
+
+  /** Gets the angle to fire the first arrow, each additional arrow offsets an additional 10 degrees */
+  public static float getAngleStart(int count) {
+    return -5 * (count - 1);
+  }
+}

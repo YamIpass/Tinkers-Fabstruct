@@ -1,0 +1,10 @@
+{
+  "ingredient": {
+    "tag": "minecraft:oak_logs"
+  },
+  "leftover": "minecraft:oak_planks",
+  "material": "tconstruct:wood",
+  "needed": 1,
+  "value": 4,
+  "type": "tconstruct:material"
+}

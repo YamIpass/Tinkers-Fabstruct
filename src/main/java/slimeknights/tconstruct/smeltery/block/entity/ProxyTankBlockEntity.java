@@ -17,6 +17,8 @@ import net.fabricmc.fabric.api.transfer.v1.storage.base.SidedStorageBlockEntity;
 import org.jetbrains.annotations.Nullable;
 import slimeknights.mantle.block.entity.MantleBlockEntity;
 import slimeknights.mantle.fluid.FluidTransferHelper;
+import slimeknights.tconstruct.library.fluid.MillibucketStorageBlockEntity;
+import slimeknights.tconstruct.smeltery.block.entity.tank.MillibucketStorage;
 import slimeknights.tconstruct.library.fluid.IFluidTankUpdater;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 import slimeknights.tconstruct.smeltery.block.entity.tank.ProxyItemTank;
@@ -24,7 +26,7 @@ import slimeknights.tconstruct.smeltery.block.entity.tank.ProxyItemTank;
 import static net.minecraft.world.level.block.state.properties.BlockStateProperties.HORIZONTAL_FACING;
 
 /** Block entity with a tank that proxies to the nested item handler */
-public class ProxyTankBlockEntity extends MantleBlockEntity implements IFluidTankUpdater, SidedStorageBlockEntity {
+public class ProxyTankBlockEntity extends MantleBlockEntity implements IFluidTankUpdater, SidedStorageBlockEntity, MillibucketStorageBlockEntity {
   /** Direct access to the fluid handler and item handler */
   @Getter
   private final ProxyItemTank<ProxyTankBlockEntity> itemTank = new ProxyItemTank<>(this);
@@ -44,7 +46,7 @@ public class ProxyTankBlockEntity extends MantleBlockEntity implements IFluidTan
   //  SidedStorageBlockEntity instead, and ProxyItemTank doubles as both the fluid and item storage.
 
   @Override
-  public Storage<FluidVariant> getFluidStorage(@Nullable Direction direction) {
+  public Storage<FluidVariant> getMillibucketStorage(@Nullable Direction direction) {
     return itemTank.getFluidStorage();
   }
 
@@ -103,8 +105,8 @@ public class ProxyTankBlockEntity extends MantleBlockEntity implements IFluidTan
     // if we have an active tank, try interacting
     if (!inventory.isEmpty()) {
       // must have a held item to interact
-      if (!held.isEmpty() && FluidTransferHelper.interactWithContainer(level, worldPosition, itemTank.getFluidStorage(), player, hand).didTransfer()
-        || FluidTransferHelper.interactWithFilledBucket(level, worldPosition, itemTank.getFluidStorage(), player, hand, getBlockState().getValue(HORIZONTAL_FACING)).didTransfer()) {
+      if (!held.isEmpty() && FluidTransferHelper.interactWithContainer(level, worldPosition, MillibucketStorage.of(itemTank.getFluidStorage()), player, hand).didTransfer()
+        || FluidTransferHelper.interactWithFilledBucket(level, worldPosition, MillibucketStorage.of(itemTank.getFluidStorage()), player, hand, getBlockState().getValue(HORIZONTAL_FACING)).didTransfer()) {
         return;
       }
       // if we clicked the tank, don't try and swap items unless we have no tank

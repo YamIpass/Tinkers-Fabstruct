@@ -30,6 +30,8 @@ import slimeknights.mantle.fluid.FluidTransferHelper;
 import slimeknights.mantle.fluid.transfer.FluidContainerTransferManager;
 import slimeknights.mantle.fluid.transfer.IFluidContainerTransfer;
 import slimeknights.mantle.fluid.transfer.IFluidContainerTransfer.TransferResult;
+import slimeknights.tconstruct.library.fluid.MillibucketStorageBlockEntity;
+import slimeknights.tconstruct.smeltery.block.entity.tank.MillibucketStorage;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.Sounds;
 import slimeknights.tconstruct.library.client.model.ModelProperties;
@@ -44,7 +46,7 @@ import slimeknights.tconstruct.smeltery.block.entity.component.TankBlockEntity.I
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class CastingTankBlockEntity extends TableBlockEntity implements ITankBlockEntity.ITankInventoryBlockEntity, WorldlyContainer {
+public class CastingTankBlockEntity extends TableBlockEntity implements ITankBlockEntity.ITankInventoryBlockEntity, WorldlyContainer, MillibucketStorageBlockEntity {
   /** Max capacity for the tank */
   // TODO(fabric): Forge's FluidType.BUCKET_VOLUME (1000 mB) has no Fabric equivalent, our MB scale uses 1000
   public static final int DEFAULT_CAPACITY = 4 * 1000;
@@ -110,8 +112,8 @@ public class CastingTankBlockEntity extends TableBlockEntity implements ITankBlo
 
     // clicked tank? move fluid
     if (clickedTank) {
-      if (!FluidTransferHelper.interactWithContainer(level, worldPosition, tank, player, hand).didTransfer()) {
-        FluidTransferHelper.interactWithFilledBucket(level, worldPosition, tank, player, hand, getBlockState().getValue(CastingTankBlock.FACING));
+      if (!FluidTransferHelper.interactWithContainer(level, worldPosition, MillibucketStorage.of(tank), player, hand).didTransfer()) {
+        FluidTransferHelper.interactWithFilledBucket(level, worldPosition, MillibucketStorage.of(tank), player, hand, getBlockState().getValue(CastingTankBlock.FACING));
       }
     } else {
       // did not click tank? swap items around
@@ -232,7 +234,7 @@ public class CastingTankBlockEntity extends TableBlockEntity implements ITankBlo
 
   // TODO(fabric): Forge exposed the tank as a capability; Fabric exposes it as a sided storage instead
   @Override
-  public Storage<FluidVariant> getFluidStorage(@Nullable Direction direction) {
+  public Storage<FluidVariant> getMillibucketStorage(@Nullable Direction direction) {
     return tank;
   }
 

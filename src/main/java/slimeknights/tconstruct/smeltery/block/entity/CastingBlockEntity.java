@@ -38,6 +38,8 @@ import slimeknights.mantle.fabric.transfer.InventoryStorage;
 import slimeknights.mantle.fluid.FluidTransferHelper;
 import slimeknights.mantle.recipe.helper.RecipeHelper;
 import slimeknights.mantle.util.BlockEntityHelper;
+import slimeknights.tconstruct.library.fluid.MillibucketStorageBlockEntity;
+import slimeknights.tconstruct.smeltery.block.entity.tank.MillibucketStorage;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.Sounds;
 import slimeknights.tconstruct.common.TinkerTags;
@@ -54,7 +56,7 @@ import slimeknights.tconstruct.smeltery.block.entity.tank.CastingFluidHandler;
 import slimeknights.tconstruct.smeltery.network.FluidUpdatePacket;
 
 @SuppressWarnings("UnstableApiUsage")
-public abstract class CastingBlockEntity extends TableBlockEntity implements WorldlyContainer, FluidUpdatePacket.IFluidPacketReceiver, SidedStorageBlockEntity {
+public abstract class CastingBlockEntity extends TableBlockEntity implements WorldlyContainer, FluidUpdatePacket.IFluidPacketReceiver, SidedStorageBlockEntity, MillibucketStorageBlockEntity {
   // slots
   public static final int INPUT = 0;
   public static final int OUTPUT = 1;
@@ -123,7 +125,7 @@ public abstract class CastingBlockEntity extends TableBlockEntity implements Wor
   }
 
   @Override
-  public Storage<FluidVariant> getFluidStorage(@org.jetbrains.annotations.Nullable Direction direction) {
+  public Storage<FluidVariant> getMillibucketStorage(@org.jetbrains.annotations.Nullable Direction direction) {
     return tank;
   }
 
@@ -139,7 +141,7 @@ public abstract class CastingBlockEntity extends TableBlockEntity implements Wor
     // first try interacting with the table as a tank. If that fails, run normal item swap logic
     // normal item swap logic should only run if we lack a fluid though
     ItemStack held = player.getItemInHand(hand);
-    if (FluidTransferHelper.interactWithContainer(level, worldPosition, tank, player, hand).didTransfer() || !tank.isEmpty()) {
+    if (FluidTransferHelper.interactWithContainer(level, worldPosition, MillibucketStorage.of(tank), player, hand).didTransfer() || !tank.isEmpty()) {
       return;
     }
 

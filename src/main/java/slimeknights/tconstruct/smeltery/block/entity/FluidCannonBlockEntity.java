@@ -24,6 +24,7 @@ import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import slimeknights.mantle.fluid.FluidTransferHelper;
+import slimeknights.tconstruct.smeltery.block.entity.tank.MillibucketStorage;
 import slimeknights.mantle.inventory.SingleItemHandler;
 import slimeknights.tconstruct.common.network.InventorySlotSyncPacket;
 import slimeknights.tconstruct.common.network.TinkerNetwork;
@@ -74,8 +75,8 @@ public class FluidCannonBlockEntity extends TankBlockEntity implements ITankInve
     }
     // transfer fluid if clicked tank
     if (clickedTank) {
-      if (!FluidTransferHelper.interactWithContainer(level, worldPosition, tank, player, hand).didTransfer()) {
-        FluidTransferHelper.interactWithFilledBucket(level, worldPosition, tank, player, hand, getBlockState().getValue(FACING));
+      if (!FluidTransferHelper.interactWithContainer(level, worldPosition, MillibucketStorage.of(tank), player, hand).didTransfer()) {
+        FluidTransferHelper.interactWithFilledBucket(level, worldPosition, MillibucketStorage.of(tank), player, hand, getBlockState().getValue(FACING));
       }
     } else {
       // no fluid transfer? swap items around

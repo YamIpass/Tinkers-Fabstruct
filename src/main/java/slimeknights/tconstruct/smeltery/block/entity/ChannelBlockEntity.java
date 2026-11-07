@@ -29,6 +29,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import slimeknights.mantle.block.entity.MantleBlockEntity;
 import slimeknights.mantle.util.WeakConsumerWrapper;
+import slimeknights.tconstruct.library.fluid.MillibucketStorageBlockEntity;
 import slimeknights.tconstruct.common.network.TinkerNetwork;
 import slimeknights.tconstruct.library.fluid.FillOnlyFluidHandler;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
@@ -36,6 +37,7 @@ import slimeknights.tconstruct.smeltery.block.ChannelBlock.ChannelConnection;
 import slimeknights.tconstruct.smeltery.block.ChannelBlock;
 import slimeknights.tconstruct.smeltery.block.entity.tank.ChannelSideTank;
 import slimeknights.tconstruct.smeltery.block.entity.tank.ChannelTank;
+import slimeknights.tconstruct.smeltery.block.entity.tank.MillibucketStorage;
 import slimeknights.tconstruct.smeltery.network.ChannelFlowPacket;
 import slimeknights.tconstruct.smeltery.network.FluidUpdatePacket.IFluidPacketReceiver;
 import slimeknights.tconstruct.smeltery.network.FluidUpdatePacket;
@@ -44,7 +46,7 @@ import slimeknights.tconstruct.smeltery.network.FluidUpdatePacket;
  * Logic for channel fluid transfer
  */
 @SuppressWarnings("UnstableApiUsage")
-public class ChannelBlockEntity extends MantleBlockEntity implements IFluidPacketReceiver, SidedStorageBlockEntity, CustomRenderBoundingBoxBlockEntity {
+public class ChannelBlockEntity extends MantleBlockEntity implements IFluidPacketReceiver, SidedStorageBlockEntity, MillibucketStorageBlockEntity, CustomRenderBoundingBoxBlockEntity {
 	/** Channel internal tank */
 	private final ChannelTank tank = new ChannelTank(FaucetBlockEntity.MB_PER_TICK * 4, this);
 	/** Handler to return from channel top */
@@ -95,7 +97,7 @@ public class ChannelBlockEntity extends MantleBlockEntity implements IFluidPacke
 	/* Fluid handlers */
 
   @Override
-  public Storage<FluidVariant> getFluidStorage(@Nullable Direction side) {
+  public Storage<FluidVariant> getMillibucketStorage(@Nullable Direction side) {
     if (side == null || side == Direction.UP) {
       return topHandler;
     }

@@ -27,7 +27,9 @@ public class GaugeBlockEntityRenderer implements BlockEntityRenderer<GaugeBlockE
       Storage<FluidVariant> tank = tile.getTank();
       FluidStack fluid = FluidStack.EMPTY;
       for (StorageView<FluidVariant> view : tank) {
-        fluid = new FluidStack(view);
+        // the block entity view counts droplets, the renderer scales against the millibucket capacity
+    fluid = new FluidStack(view.getResource().getFluid(),
+      slimeknights.tconstruct.library.fluid.FluidStorages.toMillibuckets(view.getAmount()));
         break;
       }
       if (!fluid.isEmpty()) {

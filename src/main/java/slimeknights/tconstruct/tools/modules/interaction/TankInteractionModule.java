@@ -17,6 +17,7 @@ import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.fluid.FluidTransferHelper;
+import slimeknights.tconstruct.library.fluid.FluidStorages;
 import slimeknights.tconstruct.library.json.TinkerLoadables;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.modifiers.ModifierHooks;
@@ -64,7 +65,7 @@ public record TankInteractionModule(@Nullable InteractionSource source) implemen
     }
     Direction face = context.getClickedFace();
     // TODO(fabric): Forge exposed the block fluid handler as a capability, Fabric exposes a sided fluid storage
-    Storage<FluidVariant> cap = FluidStorage.SIDED.find(world, target, face);
+    Storage<FluidVariant> cap = FluidStorages.raw(world, target, face);
     if (cap == null) {
       return InteractionResult.PASS;
     }

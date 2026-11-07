@@ -162,7 +162,8 @@ public class GuiFuelModule implements IScreenWithFluidTank, ClickableTankModule 
         }
       } else if (!fuelInfo.isEmpty()) {
         FluidStack fluid = fuelInfo.getFluid();
-        tooltip = FluidTooltipHandler.getFluidTooltip(fluid, fuelInfo.getTotalAmount());
+        // the fuel module reads the droplet storage, Mantle formats in millibuckets
+        tooltip = FluidTooltipHandler.getFluidTooltip(fluid, slimeknights.tconstruct.library.fluid.FluidStorages.toMillibuckets(fuelInfo.getTotalAmount()));
         int temperature = fuelInfo.getTemperature();
         if (temperature > 0) {
           tooltip.add(1, Component.translatable(TOOLTIP_TEMPERATURE, temperature).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));

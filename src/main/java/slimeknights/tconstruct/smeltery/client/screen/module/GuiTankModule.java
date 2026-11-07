@@ -147,7 +147,9 @@ public class GuiTankModule implements IScreenWithFluidTank, ClickableTankModule 
     int checkY = mouseY - screen.topPos;
 
     if (isHovered(checkX, checkY)) {
-      FluidStack fluid = new FluidStack(tank);
+      // the storage view counts droplets while every tooltip formatter in this mod speaks millibuckets
+      FluidStack fluid = new FluidStack(tank.getResource().getFluid(),
+        slimeknights.tconstruct.library.fluid.FluidStorages.toMillibuckets(tank.getAmount()));
       long amount = tank.getAmount();
       long capacity = tank.getCapacity();
 
@@ -194,7 +196,8 @@ public class GuiTankModule implements IScreenWithFluidTank, ClickableTankModule 
   @Override
   public FluidLocation getFluidUnderMouse(int mouseX, int mouseY) {
     if (isHovered(mouseX, mouseY) && isFluidHovered(horizontal ? mouseX : mouseY)) {
-      return new FluidLocation(new FluidStack(tank), fluidLoc);
+      return new FluidLocation(new FluidStack(tank.getResource().getFluid(),
+      slimeknights.tconstruct.library.fluid.FluidStorages.toMillibuckets(tank.getAmount())), fluidLoc);
     }
     return null;
   }

@@ -9,6 +9,7 @@ import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SidedStorageBlockEntity;
 import slimeknights.tconstruct.fluids.FluidEvents;
 import slimeknights.tconstruct.shared.PortSelfTest;
+import slimeknights.tconstruct.smeltery.block.entity.tank.MillibucketStorage;
 import net.fabricmc.fabric.api.client.rendering.v1.CoreShaderRegistrationCallback;
 import slimeknights.mantle.client.render.MantleShaders;
 import slimeknights.tconstruct.tools.ToolClientEvents;
@@ -55,9 +56,17 @@ public final class FabricEvents {
     // fabric-transfer-api already answers SidedStorageBlockEntity through its own fallback, this registration is the
     // safety net for loaders that drop that one; both simply ask the block entity for the per side handler
     FluidStorage.SIDED.registerFallback((world, pos, state, blockEntity, side) ->
-      blockEntity instanceof SidedStorageBlockEntity sided ? sided.getFluidStorage(side) : null);
+      blockEntity instanceof SidedStorageBlockEntity sided ? dropletView(sided.getFluidStorage(side)) : null);
     ItemStorage.SIDED.registerFallback((world, pos, state, blockEntity, side) ->
       blockEntity instanceof SidedStorageBlockEntity sided ? sided.getItemStorage(side) : null);
+  }
+
+  /** our tanks count millibuckets, Fabric consumers (and Jade's tooltip) count droplets, so convert at the boundary */
+  private static Storage<FluidVariant> dropletView(Storage<FluidVariant> storage) {
+    if (storage == null || storage instanceof MillibucketStorage) {
+      return storage;
+    }
+    return new MillibucketStorage(storage);
   }
 
   /** Registers client-only hooks. Called from {@code client.TinkerClient#onInitializeClient()} */

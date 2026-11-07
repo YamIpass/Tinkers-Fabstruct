@@ -11,7 +11,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
-import slimeknights.mantle.fluid.FluidTransferHelper;
+import slimeknights.tconstruct.library.fluid.FluidStorages;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.smeltery.block.entity.ITankBlockEntity;
@@ -59,7 +59,7 @@ public abstract class TinyMultiblockControllerBlock extends ControllerBlock {
   @Deprecated
   @Override
   public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
-    if (FluidTransferHelper.interactWithTank(world, pos, player, hand, hit)) {
+    if (FluidStorages.interactWithTankRaw(world, pos, player, hand, hit.getDirection())) {
       return InteractionResult.SUCCESS;
     }
     return super.use(state, world, pos, player, hand, hit);

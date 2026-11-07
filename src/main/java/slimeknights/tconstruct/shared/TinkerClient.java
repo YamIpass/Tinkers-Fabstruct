@@ -69,6 +69,7 @@ public class TinkerClient {
    * Called by TConstruct to handle any client side logic that needs to run during the constructor
    */
   public static void onConstruct() {
+    slimeknights.tconstruct.shared.client.SoulGlassOverlay.init();
     TinkerBook.initBook();
     // needs to register listeners early enough for minecraft to load
     // TODO(fabric): these loaders register against Fabric's client resource reload instead of Forge's model events

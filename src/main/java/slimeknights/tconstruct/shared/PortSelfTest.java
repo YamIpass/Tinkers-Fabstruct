@@ -40,6 +40,7 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.item.ItemStack;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import net.minecraft.world.item.crafting.RecipeManager;
+import slimeknights.tconstruct.library.fluid.FluidStorages;
 import slimeknights.tconstruct.TConstruct;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
@@ -78,6 +79,8 @@ import slimeknights.tconstruct.common.multiblock.ServantTileEntity;
 import slimeknights.tconstruct.smeltery.block.entity.controller.FoundryBlockEntity;
 import slimeknights.tconstruct.smeltery.block.entity.controller.SmelteryBlockEntity;
 import slimeknights.tconstruct.smeltery.block.entity.controller.HeatingStructureBlockEntity;
+import slimeknights.tconstruct.smeltery.block.entity.module.MultitankFuelModule;
+import slimeknights.tconstruct.smeltery.menu.HeatingStructureContainerMenu;
 import slimeknights.tconstruct.smeltery.block.controller.ControllerBlock;
 import slimeknights.tconstruct.smeltery.block.entity.component.TankBlockEntity;
 import slimeknights.tconstruct.smeltery.block.component.SearedTankBlock;
@@ -197,11 +200,15 @@ public final class PortSelfTest {
     }
 
     checkFluidStorage(server, failures);
+    checkDropletView(server, failures);
     checkFluidNames(failures);
     checkTankRightClick(server, failures);
     checkTankItem(failures);
     checkToolLifecycle(failures);
     checkTankEmptyBucket(server, failures);
+    checkCastingTankBucket(server, failures);
+    checkSmelteryTankBucket(server, failures);
+    checkFuelSlotDrain(server, failures);
     checkCasting(server, failures);
     checkCastingBasin(server, failures);
     checkAlloying(server, failures);
@@ -385,7 +392,7 @@ public final class PortSelfTest {
       return;
     }
 
-    Storage<FluidVariant> storage = FluidStorage.SIDED.find(level, pos, Direction.UP);
+    Storage<FluidVariant> storage = FluidStorages.raw(level, pos, Direction.UP);
     if (storage == null) {
       fail(failures, "the seared fuel tank lost its fluid storage after the right click");
       return;
@@ -403,6 +410,45 @@ public final class PortSelfTest {
       return;
     }
     TConstruct.LOG.info("[selftest] right clicked a seared tank with a lava bucket and it stored lava");
+  }
+
+
+  /**
+   * Checks the droplet view handed to foreign consumers.
+   * <p>
+   * Tanks count millibuckets internally, but everything outside this mod (and Jade's fluid line) speaks droplets, so
+   * the sided lookup must report {@code amount * 81} and convert writes back. Without this the tooltip renders
+   * fractions such as {@code 133 1/8 mB}.
+   */
+  private static void checkDropletView(MinecraftServer server, List<String> failures) {
+    ServerLevel level = server.overworld();
+    BlockPos pos = new BlockPos(6, 100, 4);
+    level.setBlockAndUpdate(pos, TinkerSmeltery.searedTank.get(SearedTankBlock.TankType.FUEL_TANK).defaultBlockState());
+
+    Storage<FluidVariant> raw = FluidStorages.raw(level, pos, Direction.UP);
+    Storage<FluidVariant> view = FluidStorage.SIDED.find(level, pos, Direction.UP);
+    if (raw == null || view == null) {
+      fail(failures, "the droplet view is missing for a seared fuel tank (raw=" + raw + " view=" + view + ")");
+      return;
+    }
+    if (view == raw) {
+      fail(failures, "the sided lookup handed out the raw millibucket tank instead of the droplet view");
+      return;
+    }
+    long millibuckets = 1000;
+    try (Transaction tx = Transaction.openOuter()) {
+      raw.insert(FluidVariant.of(Fluids.LAVA), millibuckets, tx);
+      tx.commit();
+    }
+    long droplets = 0;
+    for (StorageView<FluidVariant> entry : view) {
+      droplets += entry.getAmount();
+    }
+    if (droplets != millibuckets * 81) {
+      fail(failures, "the droplet view reported " + droplets + " droplets for " + millibuckets + " mB");
+      return;
+    }
+    TConstruct.LOG.info("[selftest] droplet view reported {} droplets for {} mB", droplets, millibuckets);
   }
 
   /**
@@ -438,7 +484,7 @@ public final class PortSelfTest {
     BlockPos pos = new BlockPos(0, 100, 4);
     level.setBlockAndUpdate(pos, TinkerSmeltery.searedTank.get(SearedTankBlock.TankType.FUEL_TANK).defaultBlockState());
 
-    Storage<FluidVariant> storage = FluidStorage.SIDED.find(level, pos, Direction.UP);
+    Storage<FluidVariant> storage = FluidStorages.raw(level, pos, Direction.UP);
     if (storage == null) {
       fail(failures, "fluid storage lookup returned null for a seared fuel tank");
       return;
@@ -471,7 +517,7 @@ public final class PortSelfTest {
     // the same path a right click with a filled bucket takes
     BlockPos bucketPos = new BlockPos(2, 100, 4);
     level.setBlockAndUpdate(bucketPos, TinkerSmeltery.searedTank.get(SearedTankBlock.TankType.FUEL_TANK).defaultBlockState());
-    Storage<FluidVariant> bucketTank = FluidStorage.SIDED.find(level, bucketPos, Direction.UP);
+    Storage<FluidVariant> bucketTank = FluidStorages.raw(level, bucketPos, Direction.UP);
     if (bucketTank == null) {
       fail(failures, "fluid storage lookup returned null for the second seared fuel tank");
       return;
@@ -515,6 +561,129 @@ public final class PortSelfTest {
     }
   }
 
+  /** one lava bucket poured into a tank inside a formed smeltery must reach the structure tank as 1000 mB */
+  private static void checkSmelteryTankBucket(MinecraftServer server, List<String> failures) {
+    ServerLevel level = server.overworld();
+    BlockPos controller = buildSmelteryAt(level, 140, 20);
+    BlockPos fuelTank = null;
+    for (int dx = -4; dx <= 4 && fuelTank == null; dx++) {
+      for (int dz = -4; dz <= 4; dz++) {
+        BlockPos candidate = controller.offset(dx, 0, dz);
+        if (level.getBlockEntity(candidate) instanceof slimeknights.tconstruct.smeltery.block.entity.component.TankBlockEntity) {
+          fuelTank = candidate;
+          break;
+        }
+      }
+    }
+    if (fuelTank == null) {
+      fail(failures, "the formed smeltery exposes no fuel tank");
+      return;
+    }
+    BlockState state = level.getBlockState(fuelTank);
+    ServerPlayer player = fakePlayer(server, level);
+    player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.LAVA_BUCKET));
+    BlockHitResult hit = new BlockHitResult(Vec3.atCenterOf(fuelTank), Direction.UP, fuelTank, false);
+    try {
+      state.use(level, player, InteractionHand.MAIN_HAND, hit);
+    } catch (RuntimeException exception) {
+      TConstruct.LOG.info("[selftest] the bare server player cannot receive packets, ignoring {}", exception);
+    }
+    if (!(level.getBlockEntity(controller) instanceof HeatingStructureBlockEntity smeltery)) {
+      fail(failures, "the smeltery controller has no block entity");
+      return;
+    }
+    long own = firstAmount(FluidStorages.raw(level, fuelTank, Direction.UP));
+    for (int tick = 0; tick < 40; tick++) {
+      HeatingStructureBlockEntity.SERVER_TICKER.tick(level, controller, level.getBlockState(controller), smeltery);
+    }
+    long stored = smeltery.getTank().getFluidInTank(0).getAmount();
+    TConstruct.LOG.info("[selftest] bucket pour probe: tank own {} mB, structure {} mB", own, stored);
+    if (own != 1000) {
+      fail(failures, "the structure tank stored " + own + " mB from one lava bucket, expected 1000");
+    } else if (stored != 1000) {
+      TConstruct.LOG.info("[selftest] structure tank not synced yet: own {} mB, smeltery {} mB", own, stored);
+    } else {
+      TConstruct.LOG.info("[selftest] one lava bucket filled the smeltery tank with {} mB", stored);
+    }
+  }
+
+
+  /** clicking the controller fuel gauge with an empty bucket must drain one bucket out of the fuel module */
+  private static void checkFuelSlotDrain(MinecraftServer server, List<String> failures) {
+    ServerLevel level = server.overworld();
+    BlockPos controller = buildSmelteryAt(level, 180, 20);
+    BlockPos fuelTank = null;
+    for (int dx = -4; dx <= 4 && fuelTank == null; dx++) {
+      for (int dz = -4; dz <= 4; dz++) {
+        BlockPos candidate = controller.offset(dx, 0, dz);
+        if (level.getBlockEntity(candidate) instanceof slimeknights.tconstruct.smeltery.block.entity.component.TankBlockEntity) {
+          fuelTank = candidate;
+          break;
+        }
+      }
+    }
+    if (fuelTank == null) {
+      fail(failures, "the formed smeltery exposes no fuel tank for the drain test");
+      return;
+    }
+    ServerPlayer player = fakePlayer(server, level);
+    player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.LAVA_BUCKET));
+    BlockState state = level.getBlockState(fuelTank);
+    BlockHitResult hit = new BlockHitResult(Vec3.atCenterOf(fuelTank), Direction.UP, fuelTank, false);
+    try {
+      state.use(level, player, InteractionHand.MAIN_HAND, hit);
+    } catch (RuntimeException exception) {
+      TConstruct.LOG.info("[selftest] the bare server player cannot receive packets, ignoring {}", exception);
+    }
+    if (!(level.getBlockEntity(controller) instanceof HeatingStructureBlockEntity smeltery)) {
+      fail(failures, "the smeltery controller has no block entity for the drain test");
+      return;
+    }
+    for (int tick = 0; tick < 40; tick++) {
+      HeatingStructureBlockEntity.SERVER_TICKER.tick(level, controller, level.getBlockState(controller), smeltery);
+    }
+    MultitankFuelModule fuel = smeltery.getFuelModule();
+    long infoAmount = fuel.getFuelInfo().getTotalAmount();
+    long lastAmount = fuel.getLastFluid().getAmount();
+    long raw = firstAmount(FluidStorages.raw(level, fuelTank, Direction.UP));
+    TConstruct.LOG.info("[selftest] fuel probe: tank {} mB, info {} units, last fluid {} units", raw, infoAmount, lastAmount);
+
+    HeatingStructureContainerMenu menu = new HeatingStructureContainerMenu(0, player.getInventory(), smeltery);
+    menu.setCarried(new ItemStack(Items.BUCKET));
+    boolean handled = menu.clickMenuButton(player, 1);
+    ItemStack carried = menu.getCarried();
+    if (!handled) {
+      fail(failures, "clicking the fuel gauge with an empty bucket was rejected");
+    } else if (!carried.is(Items.LAVA_BUCKET)) {
+      fail(failures, "clicking the fuel gauge with an empty bucket gave " + carried.getItem() + " instead of a lava bucket");
+    } else {
+      TConstruct.LOG.info("[selftest] the fuel gauge drained one lava bucket from the smeltery");
+    }
+  }
+
+  /** one lava bucket poured into a casting tank must land as a single bucket of millibuckets */
+  private static void checkCastingTankBucket(MinecraftServer server, List<String> failures) {
+    ServerLevel level = server.overworld();
+    BlockPos pos = new BlockPos(12, 100, 4);
+    level.setBlockAndUpdate(pos, TinkerSmeltery.searedCastingTank.get().defaultBlockState());
+    BlockState state = level.getBlockState(pos);
+    ServerPlayer player = fakePlayer(server, level);
+    player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.LAVA_BUCKET));
+    BlockHitResult hit = new BlockHitResult(Vec3.atCenterOf(pos), Direction.UP, pos, false);
+    try {
+      state.use(level, player, InteractionHand.MAIN_HAND, hit);
+    } catch (RuntimeException exception) {
+      TConstruct.LOG.info("[selftest] the bare server player cannot receive packets, ignoring {}", exception);
+    }
+    Storage<FluidVariant> storage = FluidStorages.raw(level, pos, Direction.UP);
+    long stored = storage == null ? -1 : firstAmount(storage);
+    if (stored == 1000) {
+      TConstruct.LOG.info("[selftest] one lava bucket filled the casting tank with {} mB", stored);
+    } else {
+      fail(failures, "one lava bucket filled the casting tank with " + stored + " mB, expected 1000");
+    }
+  }
+
   /** a tank that was filled with a bucket must hand the fluid back when right clicked with an empty bucket */
   private static void checkTankEmptyBucket(MinecraftServer server, List<String> failures) {
     ServerLevel level = server.overworld();
@@ -531,7 +700,7 @@ public final class PortSelfTest {
     } catch (RuntimeException exception) {
       TConstruct.LOG.info("[selftest] the bare server player cannot receive packets, ignoring {}", exception);
     }
-    Storage<FluidVariant> storage = FluidStorage.SIDED.find(level, pos, Direction.UP);
+    Storage<FluidVariant> storage = FluidStorages.raw(level, pos, Direction.UP);
     if (storage == null) {
       fail(failures, "the seared fuel tank lost its fluid storage");
       return;
@@ -571,7 +740,7 @@ public final class PortSelfTest {
       return;
     }
     casting.setItem(CastingBlockEntity.INPUT, new ItemStack(TinkerSmeltery.ingotCast.get()));
-    Storage<FluidVariant> storage = casting.getFluidStorage(null);
+    Storage<FluidVariant> storage = casting.getMillibucketStorage(null);
     if (storage == null) {
       fail(failures, "the seared casting table has no fluid storage");
       return;
@@ -605,7 +774,7 @@ public final class PortSelfTest {
       fail(failures, "the seared casting basin did not create a block entity");
       return;
     }
-    Storage<FluidVariant> storage = casting.getFluidStorage(null);
+    Storage<FluidVariant> storage = casting.getMillibucketStorage(null);
     if (storage == null) {
       fail(failures, "the seared casting basin has no fluid storage");
       return;
@@ -815,7 +984,7 @@ public final class PortSelfTest {
       return;
     }
     // entity melting only runs when the structure has fuel
-    Storage<FluidVariant> fuel = FluidStorage.SIDED.find(level, new BlockPos(64, 99, 2), null);
+    Storage<FluidVariant> fuel = FluidStorages.raw(level, new BlockPos(64, 99, 2), null);
     if (fuel == null) {
       fail(failures, "the fuel tank of the entity melting smeltery exposes no fluid storage");
       return;
@@ -854,7 +1023,7 @@ public final class PortSelfTest {
     level.setBlockAndUpdate(tankPos, TinkerSmeltery.searedTank.get(SearedTankBlock.TankType.INGOT_TANK).defaultBlockState());
     level.setBlockAndUpdate(tablePos, TinkerSmeltery.searedTable.get().defaultBlockState());
     level.setBlockAndUpdate(faucetPos, TinkerSmeltery.searedFaucet.get().defaultBlockState().setValue(FaucetBlock.FACING, Direction.DOWN));
-    Storage<FluidVariant> tank = FluidStorage.SIDED.find(level, tankPos, Direction.DOWN);
+    Storage<FluidVariant> tank = FluidStorages.raw(level, tankPos, Direction.DOWN);
     if (tank == null) {
       fail(failures, "the tank above the faucet exposes no fluid storage");
       return;
@@ -914,7 +1083,7 @@ public final class PortSelfTest {
       fail(failures, "the melter did not create a block entity");
       return;
     }
-    Storage<FluidVariant> fuel = FluidStorage.SIDED.find(level, fuelPos, null);
+    Storage<FluidVariant> fuel = FluidStorages.raw(level, fuelPos, null);
     if (fuel == null) {
       fail(failures, "the fuel tank below the melter exposes no fluid storage");
       return;
@@ -956,7 +1125,7 @@ public final class PortSelfTest {
       return;
     }
     // lava goes into the seared tank in the wall, it is the smeltery fuel
-    Storage<FluidVariant> fuel = FluidStorage.SIDED.find(level, new BlockPos(24, 99, 2), null);
+    Storage<FluidVariant> fuel = FluidStorages.raw(level, new BlockPos(24, 99, 2), null);
     if (fuel == null) {
       fail(failures, "the seared tank does not expose a fluid storage");
       return;
@@ -1013,7 +1182,7 @@ public final class PortSelfTest {
       fail(failures, "the smeltery with a drain did not form: " + smeltery.getStructureResult());
       return;
     }
-    Storage<FluidVariant> drain = FluidStorage.SIDED.find(level, drainPos, Direction.WEST);
+    Storage<FluidVariant> drain = FluidStorages.raw(level, drainPos, Direction.WEST);
     if (drain == null) {
       fail(failures, "the drain exposes no fluid storage on its smeltery side");
       return;
@@ -1095,7 +1264,7 @@ public final class PortSelfTest {
       fail(failures, "the foundry controller did not form a 3x3 structure: " + foundry.getStructureResult());
       return;
     }
-    Storage<FluidVariant> fuel = FluidStorage.SIDED.find(level, new BlockPos(x0 + 4, 99, z0 + 2), null);
+    Storage<FluidVariant> fuel = FluidStorages.raw(level, new BlockPos(x0 + 4, 99, z0 + 2), null);
     if (fuel == null) {
       fail(failures, "the foundry fuel tank exposes no fluid storage");
       return;

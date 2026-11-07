@@ -15,6 +15,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Fluids;
+import slimeknights.tconstruct.library.fluid.FluidStorages;
+import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.fluids.TinkerFluids;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
@@ -53,6 +55,24 @@ public final class PortShowcase {
     buildStationRow(level);
     buildCasting(level);
     buildGlassWall(level);
+    buildSoulRoom(level);
+  }
+
+  /**
+   * Development helper: seals a small cube of soul glass so the camera can sit inside it. Used to reproduce the
+   * "inside a view blocking block" overlay, which renders very differently from regular block rendering.
+   */
+  private static void buildSoulRoom(ServerLevel level) {
+    TConstruct.LOG.info("[showcase] soul room at y={} floorY={}", floorY + 1, floorY);
+    int y = floorY + 1;
+    BlockState glass = TinkerCommons.soulGlass.get().defaultBlockState();
+    for (int x = 24; x <= 26; x++) {
+      for (int z = 16; z <= 18; z++) {
+        for (int h = 0; h < 3; h++) {
+          level.setBlockAndUpdate(new BlockPos(x, y + h, z), glass);
+        }
+      }
+    }
   }
 
   private static int floorY = FLOOR_Y;
@@ -108,7 +128,7 @@ public final class PortShowcase {
       HeatingStructureBlockEntity.SERVER_TICKER.tick(level, controllerPos, state, structure);
       state = level.getBlockState(controllerPos);
     }
-    Storage<FluidVariant> fuel = FluidStorage.SIDED.find(level, tankPos, null);
+    Storage<FluidVariant> fuel = FluidStorages.raw(level, tankPos, null);
     if (fuel != null) {
       try (Transaction tx = Transaction.openOuter()) {
         fuel.insert(FluidVariant.of(Fluids.LAVA), 81000, tx);
@@ -143,7 +163,7 @@ public final class PortShowcase {
     level.setBlockAndUpdate(tankPos, TinkerSmeltery.searedTank.get(TankType.INGOT_TANK).defaultBlockState());
     level.setBlockAndUpdate(faucetPos, TinkerSmeltery.searedFaucet.get().defaultBlockState().setValue(FaucetBlock.FACING, Direction.DOWN));
     level.setBlockAndUpdate(tablePos, TinkerSmeltery.searedTable.get().defaultBlockState());
-    Storage<FluidVariant> tank = FluidStorage.SIDED.find(level, tankPos, Direction.DOWN);
+    Storage<FluidVariant> tank = FluidStorages.raw(level, tankPos, Direction.DOWN);
     if (tank != null) {
       try (Transaction tx = Transaction.openOuter()) {
         tank.insert(FluidVariant.of(TinkerFluids.moltenIron.get()), 2880, tx);

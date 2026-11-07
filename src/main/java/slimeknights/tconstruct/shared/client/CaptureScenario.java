@@ -38,11 +38,13 @@ public final class CaptureScenario {
     new Shot("04_stations", new Vec3(4, 102.4, 15.5), new Vec3(4, 100.4, 9)),
     new Shot("05_casting", new Vec3(10.5, 102.6, 14.2), new Vec3(10.5, 100.4, 10)),
     new Shot("06_glass", new Vec3(8, 102.2, 15.6), new Vec3(8, 100.6, 20)),
-    new Shot("07_smeltery_close", new Vec3(4.2, 101.9, 6.5), new Vec3(3.2, 100.4, 1.2))
+    new Shot("07_smeltery_close", new Vec3(4.2, 101.9, 6.5), new Vec3(3.2, 100.4, 1.2)),
+    new Shot("11_soul_glass", new Vec3(25.5, 101.6, 17.5), new Vec3(23, 100.4, 15))
   );
 
   private static int tick;
   private static int shotIndex;
+  private static boolean pendingShot = false;
   private static int nextActionAt;
   private static boolean built;
   private static boolean finished;
@@ -80,7 +82,7 @@ public final class CaptureScenario {
         level.setDayTime(4000L);
         level.setWeatherParameters(12000, 0, false, false);
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-          player.setGameMode(GameType.SPECTATOR);
+          player.setGameMode(GameType.CREATIVE);
         }
         LOG.info("[capture] showcase built");
       });
@@ -91,6 +93,10 @@ public final class CaptureScenario {
       String name = pendingName;
       pendingName = null;
       capture(minecraft, name);
+      if (pendingShot) {
+        pendingShot = false;
+        shotIndex++;
+      }
       nextActionAt = tick + 10;
       return;
     }
@@ -99,8 +105,11 @@ public final class CaptureScenario {
     }
     if (shotIndex < SHOTS.size()) {
       Shot shot = SHOTS.get(shotIndex);
-      shotIndex++;
       pendingName = shot.name();
+      if (shot.name().startsWith("11")) {
+        minecraft.options.hideGui = false;
+      }
+      pendingShot = true;
       captureAt = tick + SETTLE_TICKS;
       nextActionAt = captureAt + 1;
       server.execute(() -> teleport(server, shot));
@@ -185,6 +194,15 @@ public final class CaptureScenario {
 
   /** writes the current framebuffer to {@code run/capture/<name>.png} */
   private static void capture(Minecraft minecraft, String name) {
+    if (name.equals("11_soul_glass")) {
+      // the hud pass (and with it HudRenderCallback) only runs when the gui is visible
+    }
+    if (name.equals("11_soul_glass") && minecraft.player != null) {
+      var eye = minecraft.player.getEyePosition();
+      var pos = net.minecraft.core.BlockPos.containing(eye);
+      LOG.info("[capture] shot {} eye={} pos={} state={} viewBlocking={}", name, eye, pos,
+          minecraft.level.getBlockState(pos), minecraft.level.getBlockState(pos).isViewBlocking(minecraft.level, pos));
+    }
     RenderTarget target = minecraft.getMainRenderTarget();
     NativeImage image = new NativeImage(target.width, target.height, false);
     RenderSystem.bindTexture(target.getColorTextureId());

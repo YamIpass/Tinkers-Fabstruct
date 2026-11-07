@@ -3561,5 +3561,9 @@
   "advancements.tconstruct.world.ancient_tools.title": "考古学家",
   "advancements.tconstruct.world.ancient_tools.description": "找到所有的远古工具",
   "modmenu.nameTranslation.tconstruct": "匠魂织布",
-  "modmenu.descriptionTranslation.tconstruct": "匠魂的 Fabric 1.20.1 非官方移植（Tinkers' Fabstruct，中文名：匠魂织布）"
+  "modmenu.descriptionTranslation.tconstruct": "匠魂的 Fabric 1.20.1 非官方移植（Tinkers' Fabstruct，中文名：匠魂织布）",
+  "block.tconstruct.tank.fluid": "流体：%s",
+  "block.tconstruct.tank.mb": "%s mB",
+  "block.tconstruct.tank.ingots": "%s 锭",
+  "block.tconstruct.tank.mixed": "%s 锭 + %s mB"
 }

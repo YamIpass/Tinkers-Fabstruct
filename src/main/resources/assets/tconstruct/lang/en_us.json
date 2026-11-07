@@ -3615,5 +3615,9 @@
   "advancements.tconstruct.world.ancient_tools.title": "Archeologists",
   "advancements.tconstruct.world.ancient_tools.description": "Discover all original types of ancient tool",
   "modmenu.nameTranslation.tconstruct": "Tinkers' Fabstruct",
-  "modmenu.descriptionTranslation.tconstruct": "An unofficial Fabric 1.20.1 port of Tinkers' Construct (Chinese name: 匠魂织布)"
+  "modmenu.descriptionTranslation.tconstruct": "An unofficial Fabric 1.20.1 port of Tinkers' Construct (Chinese name: 匠魂织布)",
+  "block.tconstruct.tank.fluid": "Fluid: %s",
+  "block.tconstruct.tank.mb": "%s mB",
+  "block.tconstruct.tank.ingots": "%s Ingots",
+  "block.tconstruct.tank.mixed": "%s Ingots + %s mB"
 }

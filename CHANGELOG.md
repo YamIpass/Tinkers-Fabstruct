@@ -1,5 +1,43 @@
 # Changelog
 
+## 0.2.0 — fluid units, fuel gauge and soul glass
+
+Second public build. Everything below is loader plumbing; no recipe, stat or gameplay number was changed.
+
+### Fluid units at the Fabric boundary
+
+- Block entities now publish **droplets** to the outside world, as Fabric expects, while every recipe inside the mod keeps counting **millibuckets**. New `MillibucketStorageBlockEntity` / `MillibucketStorage` do the conversion in one place instead of at each call site.
+- Covered block entities: casting table, casting tank, channel, proxy tank, smeltery fluid IO, tank, alloyer, heating structure (smeltery/foundry controllers) and melter. 24 internal `FluidStorage.SIDED` lookups were rerouted through `FluidStorages.raw(...)` so melting, casting, alloying and fuel keep working in millibuckets.
+- Bucket right click on tanks, drains and controllers goes through `FluidStorages.interactWithTankRaw(...)`: pouring one bucket stores 1000 mB, and an empty bucket takes a full bucket back out.
+- Tank item tooltips gained the missing translation keys (`block.tconstruct.tank.fluid` / `.mb` / `.ingots` / `.mixed`) in `en_us` and `zh_cn`.
+
+### Controller fuel gauge
+
+- The fuel gauge in the smeltery/foundry controller can be drained again with an empty bucket: the fuel module was reading droplet amounts where Mantle's `fillStack` expects millibuckets, so extraction always failed.
+- Mantle's `fillStack` now accepts **both** conventions (81000 droplets or 1000 mB per bucket) instead of assuming one, so tanks from other mods keep working.
+- `playUISound` no longer sends a packet to a `ServerPlayer` without a connection, which used to abort the transfer.
+
+### GUI
+
+- Fluid amounts in the melter/casting-tank gauges and in the tank gauge renderer are converted from droplets to millibuckets, so `1000 mB` is no longer shown as `81B`.
+- Mantle's fluid tooltip units were corrected (`bucket = 1000`, `millibucket = 1`), so tooltips no longer read `7B 2900 droplet`.
+- `MelterScreen` regained the `mouseClicked` override that was lost in the port: left click a fluid to fill the held item, left/right click the fuel gauge to drain or fill it.
+
+### Soul glass
+
+- Standing inside soul glass no longer turns the screen black: vanilla draws that overlay with a hard-coded dark colour, so the mixin cancels it and a HUD layer draws the soul glass texture with its own alpha (`textures/block/soul_glass_overlay.png`).
+- Applies to plain soul glass, seared soul glass and scorched soul glass.
+
+### Diagnostics
+
+- Removed the `[tank] droplet view ... raw ...` chat probe and the `/tconstruct tank` diagnostic command that shipped in the previous test build.
+- New self tests: `checkDropletView`, `checkCastingTankBucket`, `checkSmelteryTankBucket` and `checkFuelSlotDrain` (the last one builds a smeltery, pours a lava bucket into the fuel tank, drives `clickMenuButton(player, 1)` with an empty bucket in hand and asserts a lava bucket comes back).
+
+### Verification
+
+- `./gradlew runServer -Pselftest=true`: 60+ assertions, all pass.
+- Client smoke test: world load, stations, smeltery GUI, tank interactions, soul glass overlay, no model bake failures.
+
 ## 0.1.0 — first public build
 
 First unofficial Fabric port of Tinkers' Construct 3.12.1 for Minecraft 1.20.1.

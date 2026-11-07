@@ -26,6 +26,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 import slimeknights.mantle.block.entity.NameableBlockEntity;
 import slimeknights.mantle.client.model.ModelData;
+import slimeknights.tconstruct.library.fluid.MillibucketStorageBlockEntity;
+import slimeknights.tconstruct.smeltery.block.entity.tank.MillibucketStorage;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.common.config.Config;
@@ -44,7 +46,7 @@ import slimeknights.tconstruct.smeltery.block.entity.module.MeltingModuleInvento
 import slimeknights.tconstruct.smeltery.block.entity.module.SolidFuelModule;
 import slimeknights.tconstruct.smeltery.menu.MelterContainerMenu;
 
-public class MelterBlockEntity extends NameableBlockEntity implements ITankInventoryBlockEntity, SidedStorageBlockEntity, ChunkUnloadListeningBlockEntity {
+public class MelterBlockEntity extends NameableBlockEntity implements ITankInventoryBlockEntity, SidedStorageBlockEntity, MillibucketStorageBlockEntity, ChunkUnloadListeningBlockEntity {
 
   /** Max capacity for the tank */
   private static final long TANK_CAPACITY = FluidValues.INGOT * 12;
@@ -115,7 +117,7 @@ public class MelterBlockEntity extends NameableBlockEntity implements ITankInven
   
   @Nullable
   @Override
-  public Storage<FluidVariant> getFluidStorage(@Nullable Direction direction) {
+  public Storage<FluidVariant> getMillibucketStorage(@Nullable Direction direction) {
     return tank;
   }
   

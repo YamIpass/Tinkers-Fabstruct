@@ -21,6 +21,8 @@ import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import slimeknights.mantle.block.entity.NameableBlockEntity;
+import slimeknights.tconstruct.library.fluid.MillibucketStorageBlockEntity;
+import slimeknights.tconstruct.smeltery.block.entity.tank.MillibucketStorage;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.library.fluid.FluidTankAnimated;
@@ -39,7 +41,7 @@ import slimeknights.tconstruct.smeltery.menu.AlloyerContainerMenu;
 /**
  * Dedicated alloying block
  */
-public class AlloyerBlockEntity extends NameableBlockEntity implements ITankBlockEntity, SidedStorageBlockEntity {
+public class AlloyerBlockEntity extends NameableBlockEntity implements ITankBlockEntity, SidedStorageBlockEntity, MillibucketStorageBlockEntity {
   /** Max capacity for the tank */
   private static final long TANK_CAPACITY = TankType.INGOT_TANK.getCapacity();
   /** Name of the container */
@@ -83,7 +85,7 @@ public class AlloyerBlockEntity extends NameableBlockEntity implements ITankBloc
 
   @Nonnull
   @Override
-  public Storage<FluidVariant> getFluidStorage(@org.jetbrains.annotations.Nullable Direction direction) {
+  public Storage<FluidVariant> getMillibucketStorage(@org.jetbrains.annotations.Nullable Direction direction) {
     return tank;
   }
 

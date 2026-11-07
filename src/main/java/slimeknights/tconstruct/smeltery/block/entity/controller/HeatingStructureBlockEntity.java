@@ -49,6 +49,8 @@ import slimeknights.mantle.client.model.data.IModelData;
 import slimeknights.mantle.client.model.data.ModelDataMap;
 import slimeknights.mantle.util.BlockEntityHelper;
 import slimeknights.mantle.util.RetexturedHelper;
+import slimeknights.tconstruct.library.fluid.MillibucketStorageBlockEntity;
+import slimeknights.tconstruct.smeltery.block.entity.tank.MillibucketStorage;
 import slimeknights.tconstruct.common.multiblock.IMasterLogic;
 import slimeknights.tconstruct.common.multiblock.IServantLogic;
 import slimeknights.tconstruct.common.network.TinkerNetwork;
@@ -70,7 +72,7 @@ import slimeknights.tconstruct.smeltery.network.StructureErrorPositionPacket;
 import slimeknights.tconstruct.smeltery.network.StructureUpdatePacket;
 import static slimeknights.mantle.util.RetexturedHelper.TAG_TEXTURE;
 
-public abstract class HeatingStructureBlockEntity extends NameableBlockEntity implements IMasterLogic, ISmelteryTankHandler, IRetexturedBlockEntity, SidedStorageBlockEntity, CustomRenderBoundingBoxBlockEntity {
+public abstract class HeatingStructureBlockEntity extends NameableBlockEntity implements IMasterLogic, ISmelteryTankHandler, IRetexturedBlockEntity, SidedStorageBlockEntity, MillibucketStorageBlockEntity, CustomRenderBoundingBoxBlockEntity {
   private static final String TAG_STRUCTURE = "multiblock";
 
   private static final String TAG_TANK = "tank";
@@ -347,7 +349,8 @@ public abstract class HeatingStructureBlockEntity extends NameableBlockEntity im
    * fabric has no capabilities, so the sided lookup asks the block entity directly.
    */
   @Override
-  public @Nullable Storage<FluidVariant> getFluidStorage(@Nullable Direction direction) {
+  public Storage<FluidVariant> getMillibucketStorage(@Nullable Direction direction) {
+    // the sided lookup in FabricEvents wraps this tank in the droplet view every Fabric consumer expects
     return structure == null ? null : tank;
   }
 

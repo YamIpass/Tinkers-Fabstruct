@@ -20,6 +20,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import slimeknights.mantle.block.entity.MantleBlockEntity;
 import slimeknights.mantle.util.WeakConsumerWrapper;
+import slimeknights.tconstruct.library.fluid.FluidStorages;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.library.recipe.alloying.IMutableAlloyTank;
 import slimeknights.tconstruct.smeltery.block.entity.tank.EmptyFluidStorage;
@@ -142,7 +143,7 @@ public class MixerAlloyTank implements IMutableAlloyTank {
           // limit by blocks as that gives the modpack more control, say they want to allow only scorched tanks
           if (world.getBlockState(target).is(TinkerTags.Blocks.ALLOYER_TANKS)) {
             // if we found a tank, increment the number of tanks
-            Storage<FluidVariant> capability = FluidStorage.SIDED.find(world, target, direction.getOpposite());
+            Storage<FluidVariant> capability = FluidStorages.raw(world, target, direction.getOpposite());
             if (capability != null && capability instanceof SlottedStorage<FluidVariant> storage) {
               // attach a listener so we know when the side invalidates
 //              capability.addListener(listeners.computeIfAbsent(direction, dir -> new WeakConsumerWrapper<>(this, (self, handler) -> {

@@ -37,6 +37,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.Nullable;
 import slimeknights.mantle.block.entity.MantleBlockEntity;
+import slimeknights.tconstruct.library.fluid.FluidStorages;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.recipe.fuel.MeltingFuel;
 import slimeknights.tconstruct.library.recipe.fuel.MeltingFuelLookup;
@@ -281,7 +282,7 @@ public abstract class FuelModule implements ContainerData {
    */
   private int tryFindFuel(BlockPos pos, boolean consume) {
     // if we find a valid cap, try to consume fuel from it
-    Storage<FluidVariant> storage = FluidStorage.SIDED.find(getLevel(), pos, null);
+    Storage<FluidVariant> storage = FluidStorages.raw(getLevel(), pos, null);
     Optional<Integer> temperature = Optional.ofNullable(storage).map(tryLiquidFuel(consume));
     if (temperature.isPresent()) {
       itemHandler = null;
@@ -467,7 +468,7 @@ public abstract class FuelModule implements ContainerData {
 
     // fetch primary fuel handler
     if (fluidHandler == null && itemHandler == null) {
-      Storage<FluidVariant> fluidCap = FluidStorage.SIDED.find(getLevel(), mainTank, null);
+      Storage<FluidVariant> fluidCap = FluidStorages.raw(getLevel(), mainTank, null);
       if (fluidCap != null) {
         fluidHandler = StorageProvider.createForFluids(getLevel(), mainTank);
       } else {
@@ -508,7 +509,7 @@ public abstract class FuelModule implements ContainerData {
         if (positions == null) positions = tankSupplier.get();
         for (BlockPos pos : positions) {
           if (!pos.equals(mainTank)) {
-            Storage<FluidVariant> handler = FluidStorage.SIDED.find(world, pos, null);
+            Storage<FluidVariant> handler = FluidStorages.raw(world, pos, null);
             if (handler != null) {
               tankDisplayHandlers.add(pos);
             }
@@ -519,7 +520,7 @@ public abstract class FuelModule implements ContainerData {
       // add display info from each handler
       FluidStack currentFuel = info.getFluid();
       for (BlockPos pos : tankDisplayHandlers) {
-        Storage<FluidVariant> handler = FluidStorage.SIDED.find(world, pos, null);
+        Storage<FluidVariant> handler = FluidStorages.raw(world, pos, null);
         if (handler != null ) {
           // sum if empty (more capacity) or the same fluid (more amount and capacity)
           for (StorageView<FluidVariant> view : handler.nonEmptyViews()) {

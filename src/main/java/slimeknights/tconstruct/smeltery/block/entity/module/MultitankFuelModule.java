@@ -1,5 +1,6 @@
 package slimeknights.tconstruct.smeltery.block.entity.module;
 
+import slimeknights.tconstruct.library.fluid.FluidStorages;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import io.github.fabricators_of_create.porting_lib.util.StorageProvider;
 import java.util.ArrayList;
@@ -49,7 +50,7 @@ public class MultitankFuelModule extends FuelModule implements Storage<FluidVari
     BlockPos pos = be.getBlockPos();
     if (tankHandlers != null && !tankHandlers.containsKey(pos)) {
       // TODO(fabric): Forge capability listeners have no Fabric equivalent, the block api cache invalidates itself
-      Storage<FluidVariant> handler = FluidStorage.SIDED.find(be.getLevel(), pos, null);
+      Storage<FluidVariant> handler = FluidStorages.raw(be.getLevel(), pos, null);
       if (handler != null) {
         tankHandlers.put(pos, StorageProvider.createForFluids(be.getLevel(), pos));
       }
@@ -62,7 +63,7 @@ public class MultitankFuelModule extends FuelModule implements Storage<FluidVari
       tankHandlers = new LinkedHashMap<>();
       Level world = getLevel();
       for (BlockPos pos : tankSupplier.get()) {
-        if (FluidStorage.SIDED.find(world, pos, null) != null) {
+        if (FluidStorages.raw(world, pos, null) != null) {
           tankHandlers.put(pos, StorageProvider.createForFluids(world, pos));
         }
       }
@@ -281,7 +282,7 @@ public class MultitankFuelModule extends FuelModule implements Storage<FluidVari
       if (storage != null) {
         StorageView<FluidVariant> view = firstView(storage);
         if (view != null) {
-          return new FluidStack(view);
+          return FluidStorages.stack(view);
         }
       }
     }
@@ -301,7 +302,7 @@ public class MultitankFuelModule extends FuelModule implements Storage<FluidVari
       return FluidStack.EMPTY;
     }
     StorageView<FluidVariant> view = firstView(storage);
-    return view == null ? FluidStack.EMPTY : new FluidStack(view);
+    return view == null ? FluidStack.EMPTY : FluidStorages.stack(view);
   }
 
   /** Gets all tank storages, in tank order */

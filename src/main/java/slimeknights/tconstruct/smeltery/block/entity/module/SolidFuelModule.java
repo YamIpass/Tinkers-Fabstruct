@@ -16,6 +16,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import slimeknights.mantle.block.entity.MantleBlockEntity;
+import slimeknights.tconstruct.library.fluid.FluidStorages;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.recipe.fuel.MeltingFuel;
 import slimeknights.tconstruct.library.recipe.fuel.MeltingFuelLookup;
@@ -94,7 +95,7 @@ public class SolidFuelModule extends FuelModule {
     if (te != null) {
       // first, identify a capability that has what we need
       // on the chance both are present, we prioritize fluid; we don't expect that to change
-      if (FluidStorage.SIDED.find(level, fuelPos, null) != null) {
+      if (FluidStorages.raw(level, fuelPos, null) != null) {
         fluidHandler = StorageProvider.createForFluids(level, fuelPos);
       }
       if (ItemStorage.SIDED.find(level, fuelPos, null) != null) {

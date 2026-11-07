@@ -22,6 +22,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import slimeknights.mantle.client.model.ModelData;
+import slimeknights.tconstruct.library.fluid.MillibucketStorageBlockEntity;
+import slimeknights.tconstruct.smeltery.block.entity.tank.MillibucketStorage;
 import slimeknights.tconstruct.common.multiblock.IMasterLogic;
 import slimeknights.tconstruct.library.client.model.ModelProperties;
 import slimeknights.tconstruct.library.fluid.FluidTankAnimated;
@@ -32,7 +34,7 @@ import slimeknights.tconstruct.smeltery.block.component.SearedTankBlock;
 import slimeknights.tconstruct.smeltery.block.entity.ITankBlockEntity;
 import slimeknights.tconstruct.smeltery.item.TankItem;
 
-public class TankBlockEntity extends SmelteryComponentBlockEntity implements ITankBlockEntity, SidedStorageBlockEntity {
+public class TankBlockEntity extends SmelteryComponentBlockEntity implements ITankBlockEntity, SidedStorageBlockEntity, MillibucketStorageBlockEntity {
   /** Max capacity for the tank */
   // TODO(fabric): Forge's FluidType.BUCKET_VOLUME (1000 mB) has no Fabric equivalent, our MB scale uses 1000
   public static final int DEFAULT_CAPACITY = 4 * 1000;
@@ -93,7 +95,7 @@ public class TankBlockEntity extends SmelteryComponentBlockEntity implements ITa
 
   @Override
   @Nonnull
-  public Storage<FluidVariant> getFluidStorage(@Nullable Direction direction) {
+  public Storage<FluidVariant> getMillibucketStorage(@Nullable Direction direction) {
     return tank;
   }
 

@@ -31,6 +31,8 @@ import slimeknights.mantle.client.model.data.ModelDataMap;
 import slimeknights.mantle.inventory.EmptyItemHandler;
 import slimeknights.mantle.util.RetexturedHelper;
 import slimeknights.mantle.util.WeakConsumerWrapper;
+import slimeknights.tconstruct.library.fluid.MillibucketStorageBlockEntity;
+import slimeknights.tconstruct.smeltery.block.entity.tank.MillibucketStorage;
 import slimeknights.tconstruct.common.multiblock.IMasterLogic;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 import slimeknights.tconstruct.smeltery.block.entity.tank.IDisplayFluidListener;
@@ -182,7 +184,7 @@ public abstract class SmelteryInputOutputBlockEntity<T> extends SmelteryComponen
   }
 
   /** Fluid implementation of smeltery IO */
-  public static abstract class SmelteryFluidIO extends SmelteryInputOutputBlockEntity<FluidVariant> implements SidedStorageBlockEntity {
+  public static abstract class SmelteryFluidIO extends SmelteryInputOutputBlockEntity<FluidVariant> implements SidedStorageBlockEntity, MillibucketStorageBlockEntity {
     protected SmelteryFluidIO(BlockEntityType<?> type, BlockPos pos, BlockState state) {
       super(type, pos, state, FluidStorage.SIDED);
     }
@@ -214,7 +216,7 @@ public abstract class SmelteryInputOutputBlockEntity<T> extends SmelteryComponen
 
     @Nullable
     @Override
-    public Storage<FluidVariant> getFluidStorage(@Nullable Direction direction) {
+    public Storage<FluidVariant> getMillibucketStorage(@Nullable Direction direction) {
       return getCachedCapability();
     }
   }

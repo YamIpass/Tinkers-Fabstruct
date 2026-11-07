@@ -105,6 +105,23 @@ public class MelterScreen extends AbstractContainerScreen<MelterContainerMenu> i
   }
 
   @Override
+  public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    if (minecraft != null && minecraft.player != null && minecraft.gameMode != null
+        && !minecraft.player.isSpectator() && (button == 0 || button == 1) && !menu.getCarried().isEmpty()) {
+      int checkX = (int)mouseX - leftPos;
+      int checkY = (int)mouseY - topPos;
+      // left clicking the fluid fills the held item, right clicking dumps it
+      if (tank != null && tank.tryClick(checkX, checkY, button, 0)) {
+        return true;
+      }
+      if (fuel != null && fuel.tryClick(checkX, checkY, button, 2)) {
+        return true;
+      }
+    }
+    return super.mouseClicked(mouseX, mouseY, button);
+  }
+
+  @Override
   public FluidLocation getFluidUnderMouse(int mouseX, int mouseY) {
     int checkX = mouseX - leftPos;
     int checkY = mouseY - topPos;

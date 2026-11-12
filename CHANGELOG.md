@@ -1,5 +1,46 @@
 # Changelog
 
+## 0.3.0 — JEI integration
+
+Third public build. The port had no JEI plugin at all, so JEI only ever showed the mod's items
+inside vanilla crafting recipes; its own stations were invisible. This build adds them.
+
+### JEI plugin (first stage)
+
+- Six new recipe categories: tool building, tool modification, modifiers, part builder, molding and
+  the modifier worktable. Loaded counts on a fresh world: 26 / 206 / 270 / 204 / 58 / 25.
+- Ingredient types for material variants, modifiers, patterns and slot types, so the categories can
+  render the same icons the block GUIs use.
+- Recipe transfer handlers for the tinker station and the tool inventory, plus catalysts for the four
+  worktables, the anvil and the modifier worktable.
+- Material recipe extensions (`shaped` / `shapeless` / tool tinkering) so the material-variant crafting
+  recipes are grouped with the station recipes instead of dangling in vanilla categories.
+
+### JEI tag pages
+
+- JEI titles tag pages with the key `tag.<registry>.<namespace>.<path>` and falls back to the raw id
+  (`#tconstruct:tooltips/metal`). Upstream ships none of those keys. 885 tags of this mod now have
+  readable names in English and Chinese — for example `tooltips/metal` → "Tooltips · Metal" /
+  「工具提示 · 金属」 and `casts/single_use/ingot` → 「铸模 · 一次性 · 锭」.
+- The small grey line under the title is JEI's own raw id rendering and cannot be translated.
+
+### Build
+
+- JEI is a compile-only dependency: players bring their own JEI, nothing is nested into the jar.
+  A local `libs-compile/` jar is preferred for offline builds, with Modrinth's maven as the fallback
+  for a fresh clone.
+- The bundled Mantle jar no longer advertises a `jei_mod_plugin` entry point it does not ship, which
+  made JEI log `Mantle specified an invalid entrypoint`.
+- Added a minimal `slimeknights.mantle.plugin.jei.MantleJEIConstants` shim: upstream's material and
+  tool-tinkering extensions need it, but the trimmed Mantle jar does not contain the class.
+
+### Not yet
+
+- Fluid recipe categories (melting, casting, alloying, entity melting, severing, fuel) still are not
+  registered. Fabric JEI represents fluids as `FabricTypes.FLUID_STACK` +
+  `JeiFluidIngredient(Fluid, long, CompoundTag)`, while upstream's plugins were written against
+  Forge's `FluidStack`; that rewrite is the next stage.
+
 ## 0.2.0 — fluid units, fuel gauge and soul glass
 
 Second public build. Everything below is loader plumbing; no recipe, stat or gameplay number was changed.

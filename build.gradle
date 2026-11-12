@@ -13,6 +13,8 @@ base {
 
 repositories {
     mavenCentral()
+    // JEI is only needed at compile time for the (optional) JEI plugin; players bring their own copy.
+    maven { url = 'https://api.modrinth.com/maven'; content { includeGroup 'maven.modrinth' } }
 }
 
 dependencies {
@@ -29,6 +31,13 @@ dependencies {
     // Hephaestus jar so upstream Tinkers' Construct sources can be copied over nearly verbatim.
     // Loom cannot nest file dependencies for us, so jar with the META-INF/jars block below.
     modImplementation fileTree(dir: 'libs', include: '*.jar')
+    // compile only: JEI is provided by the player, never nested into the jar.
+    // Prefer the local jar (offline builds); fall back to Modrinth's maven so a fresh clone still compiles.
+    if (file('libs-compile').exists()) {
+        modCompileOnly fileTree(dir: 'libs-compile', include: '*.jar')
+    } else {
+        modCompileOnly "maven.modrinth:jei:${project.jei_version}"
+    }
 
     // Upstream Tinkers' Construct code is copied over nearly verbatim, which means Lombok annotations and
     // javax.annotation nullability markers come along with it.

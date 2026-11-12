@@ -1,3 +1,24 @@
+## 2026-11-08 15:05 JEI 标签页标题本地化
+
+JEI 的「流体标签 / 物品标签」页标题走翻译键 `tag.<registryPath>.<tagNamespace>.<tagPath>`（Fabric 实现见 `mezz/jei/fabric/platform/RenderHelper.getTagTranslationKey`，`sanitizePath` 会把 `/` 换成 `.`），取不到就回退成 `#<namespace>:<path>`。上游 3.12.1 一个这样的键都没有，所以所有标签页标题都是原始 id（用户 2026-11-08 截图反馈）。
+
+- 用 `.port_tmp/gen_tag_lang.py` 扫描 `src/main/resources/data/*/tags/**`，按 `items→item`、`blocks→block`、`fluids→fluid`、`entity_types→entity_type` 等映射生成键，共 **885 个标签**（item 475 / fluid 131 / block 190 / entity_type 44 / enchantment 21 / damage_type 21 / 其余 3）。
+- `en_us.json` 与 `zh_cn.json` 各新增 **864 条**（英文是路径单词首字母大写用 ` · ` 连接；中文走术语表，如 `tooltips/metal` → 「工具提示 · 金属」、`patterns` → 「模具」）。
+- 标题下方的灰色小字仍是 JEI 自己画的原始 id，无法用语言文件改。
+- 产物 **31,745,483 B**，已部署到 `D:/game/.minecraft/versions/1.20.1-Fabric 0.20.1/mods/Tinkers-Fabstruct-1.20.1-0.2.0.jar`。
+
+## 2026-11-08 03:20 JEI 插件（第一阶段：工作站配方）
+
+移植版此前完全没有 JEI 插件（`plugin/` 目录是空的），所以 JEI 只能看到原版合成表里的匠魂物品，看不到匠魂自己的工作站配方。本轮把上游 `plugin/jei` 搬进来并只保留不依赖 Forge 流体 API 的分类：
+
+- 新分类：工具装配（tool building）、工具改造（tool modification）、强化（modifiers）、部件制造台（part builder）、模具（molding）、强化工作台（modifier worktable）。
+- 新增 `shaped/shapeless` 材料配方扩展、`ToolTinkeringExtension`、两个配方转移处理器（TinkerStationTransferInfo / ToolInventoryTransferInfo）。
+- JEI 作为 `modCompileOnly` 依赖，不进 jar（构建产物里没有任何 jei jar），玩家自备 JEI。
+- 首次进世界日志：`[jei] station recipes: tool building=26, tool modification=206, modifiers=270, part builder=204, molding=58, worktable=25`，无 `Unknown ingredient` / 无分类注册异常。
+- 顺带修掉两处 jei 相关噪音：Mantle jar 的 `jei_mod_plugin` 入口指向它自己构建里被排除的类（JEI 报 invalid entrypoint），已从内嵌 jar 的 `fabric.mod.json` 去掉；`slimeknights.mantle.plugin.jei.MantleJEIConstants` 在我们源码里补了一个最小实现（`getCraftingIndex`）。
+
+流体类分类（熔炼/浇铸/合金/实体熔炼/断头/燃料）暂未注册：Fabric 版 JEI 用 `FabricTypes.FLUID_STACK` + `JeiFluidIngredient(Fluid, long, CompoundTag)` 表示流体，上游插件是针对 Forge `FluidStack` 写的，需要改写后才能搬。
+
 ## 2026-11-08 01:20 控制器燃料槽取液（droplet / mB 的最后一处）
 
 - 现象：空桶左键点控制器右侧燃料槽取不出岩浆；矿物/流体槽正常。

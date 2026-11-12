@@ -15,6 +15,9 @@
   "icon": "icon.png",
   "environment": "*",
   "entrypoints": {
+    "jei_mod_plugin": [
+      "slimeknights.tconstruct.plugin.jei.JEIPlugin"
+    ],
     "main": [
       "slimeknights.tconstruct.TConstruct"
     ],
